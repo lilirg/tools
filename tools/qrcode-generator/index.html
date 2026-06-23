@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>二维码生成器</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container { max-width: 1000px; margin: 0 auto; }
+
+    .demo-title { text-align: center; margin-bottom: 30px; }
+    .demo-title h1 { font-size: 28px; color: #1a1a1a; margin-bottom: 8px; }
+    .demo-title p { color: #888; font-size: 14px; }
+
+    /* ===== 主布局 ===== */
+    .main-layout {
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 24px;
+      align-items: start;
+    }
+
+    /* ===== 预览区 ===== */
+    .preview-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      text-align: center;
+    }
+
+    .preview-card h2 {
+      font-size: 18px;
+      color: #333;
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    .qr-preview-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 350px;
+      position: relative;
+    }
+
+    .qr-preview-wrapper canvas {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      image-rendering: pixelated;
+    }
+
+    .qr-placeholder {
+      color: #ccc;
+      font-size: 16px;
+      text-align: center;
+      padding: 40px;
+    }
+
+    .qr-placeholder .icon {
+      font-size: 64px;
+      display: block;
+      margin-bottom: 16px;
+    }
+
+    .qr-info {
+      margin-top: 16px;
+      padding: 12px 16px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      font-size: 13px;
+      color: #666;
+      text-align: left;
+      display: none;
+    }
+
+    .qr-info.show { display: block; }
+    .qr-info span { color: #333; font-weight: 600; }
+
+    /* ===== 下载按钮 ===== */
+    .download-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn {
+      padding: 10px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn:hover { transform: translateY(-1px); }
+    .btn:active { transform: scale(0.98); }
+
+    .btn-primary { background: #1677ff; color: #fff; }
+    .btn-primary:hover { background: #4096ff; }
+    .btn-success { background: #52c41a; color: #fff; }
+    .btn-success:hover { background: #73d13d; }
+    .btn-default { background: #f0f0f0; color: #666; }
+    .btn-default:hover { background: #e0e0e0; }
+    .btn-danger { background: #ff4d4f; color: #fff; }
+    .btn-danger:hover { background: #ff7875; }
+
+    /* ===== 控制面板 ===== */
+    .control-panel {
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+
+    .control-panel h2 {
+      font-size: 16px;
+      color: #333;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 6px;
+    }
+
+    .form-group textarea,
+    .form-group input[type="text"],
+    .form-group select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #d9d9d9;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: border-color 0.2s;
+      font-family: inherit;
+      background: #fff;
+    }
+
+    .form-group textarea:focus,
+    .form-group input[type="text"]:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: #1677ff;
+      box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.1);
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 60px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    /* ===== 颜色选择 ===== */
+    .color-input-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .color-input-group input[type="color"] {
+      width: 40px;
+      height: 40px;
+      border: 2px solid #e8e8e8;
+      border-radius: 8px;
+      cursor: pointer;
+      padding: 2px;
+      background: #fff;
+    }
+
+    .color-input-group input[type="text"] {
+      flex: 1;
+    }
+
+    /* ===== 预设颜色 ===== */
+    .preset-colors {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .preset-color-btn {
+      width: 100%;
+      aspect-ratio: 1;
+      border: 2px solid transparent;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .preset-color-btn:hover {
+      transform: scale(1.1);
+      z-index: 1;
+    }
+
+    .preset-color-btn.active {
+      border-color: #1677ff;
+      box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.3);
+    }
+
+    .preset-color-btn .color-label {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      font-size: 8px;
+      text-align: center;
+      background: rgba(0,0,0,0.5);
+      color: #fff;
+      padding: 1px 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ===== 尺寸滑块 ===== */
+    .size-slider-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .size-slider-group input[type="range"] {
+      flex: 1;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 6px;
+      border-radius: 3px;
+      background: #e8e8e8;
+      outline: none;
+    }
+
+    .size-slider-group input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #1677ff;
+      cursor: pointer;
+      border: 2px solid #fff;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .size-value {
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+      min-width: 40px;
+      text-align: center;
+    }
+
+    /* ===== Logo 上传 ===== */
+    .logo-upload-area {
+      border: 2px dashed #d9d9d9;
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .logo-upload-area:hover {
+      border-color: #1677ff;
+      background: rgba(22, 119, 255, 0.02);
+    }
+
+    .logo-upload-area.has-logo {
+      border-color: #52c41a;
+      background: rgba(82, 196, 26, 0.02);
+    }
+
+    .logo-upload-area input[type="file"] {
+      display: none;
+    }
+
+    .logo-upload-area .upload-hint {
+      font-size: 13px;
+      color: #999;
+    }
+
+    .logo-upload-area .upload-hint .icon {
+      font-size: 24px;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .logo-preview {
+      display: none;
+      max-width: 60px;
+      max-height: 60px;
+      border-radius: 4px;
+      margin: 0 auto;
+    }
+
+    .logo-upload-area.has-logo .upload-hint { display: none; }
+    .logo-upload-area.has-logo .logo-preview { display: block; }
+
+    .logo-remove-btn {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #ff4d4f;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      font-size: 12px;
+      line-height: 20px;
+      text-align: center;
+      display: none;
+    }
+
+    .logo-upload-area.has-logo .logo-remove-btn { display: block; }
+
+    /* ===== 高级选项 ===== */
+    .advanced-toggle {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: #1677ff;
+      cursor: pointer;
+      margin-bottom: 12px;
+      user-select: none;
+    }
+
+    .advanced-toggle:hover { color: #4096ff; }
+
+    .advanced-options {
+      display: none;
+    }
+
+    .advanced-options.show { display: block; }
+
+    /* ===== 历史记录 ===== */
+    .history-section {
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid #f0f0f0;
+    }
+
+    .history-section h3 {
+      font-size: 14px;
+      color: #555;
+      margin-bottom: 10px;
+    }
+
+    .history-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .history-item {
+      width: 48px;
+      height: 48px;
+      border: 2px solid #e8e8e8;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .history-item:hover {
+      border-color: #1677ff;
+      transform: scale(1.1);
+    }
+
+    .history-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .history-item .remove-history {
+      position: absolute;
+      top: -2px;
+      right: -2px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #ff4d4f;
+      color: #fff;
+      border: none;
+      font-size: 10px;
+      cursor: pointer;
+      display: none;
+      line-height: 16px;
+      text-align: center;
+    }
+
+    .history-item:hover .remove-history { display: block; }
+
+    .history-empty {
+      font-size: 13px;
+      color: #ccc;
+    }
+
+    /* ===== Toast ===== */
+    .qr-toast {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-20px);
+      padding: 10px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #fff;
+      z-index: 100000;
+      opacity: 0;
+      transition: all 0.3s ease;
+      pointer-events: none;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .qr-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .qr-toast.hide { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+    .qr-toast-success { background: #52c41a; }
+    .qr-toast-error { background: #ff4d4f; }
+    .qr-toast-warning { background: #faad14; color: #333; }
+    .qr-toast-info { background: #1677ff; }
+
+    /* ===== 响应式 ===== */
+    @media (max-width: 768px) {
+      .main-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .demo-title h1 { font-size: 24px; }
+      .preview-card { padding: 20px; }
+      .control-panel { padding: 20px; }
+      .form-row { grid-template-columns: 1fr; }
+      .preset-colors { grid-template-columns: repeat(4, 1fr); }
+    }
+
+    @media (max-width: 400px) {
+      body { padding: 12px; }
+      .preview-card { padding: 16px; }
+      .control-panel { padding: 16px; }
+      .download-actions .btn { flex: 1; text-align: center; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="demo-title">
+      <h1>📱 二维码生成器</h1>
+      <p>纯前端实现 · 支持自定义颜色/Logo/样式 · 可下载 PNG/SVG</p>
+    </div>
+
+    <div class="main-layout">
+      <!-- ===== 预览区 ===== -->
+      <div class="preview-card">
+        <h2>🔲 二维码预览</h2>
+        <div class="qr-preview-wrapper">
+          <div class="qr-placeholder" id="qrPlaceholder">
+            <span class="icon">📱</span>
+            输入内容后自动生成二维码
+          </div>
+          <canvas id="qrCanvas" style="display:none;"></canvas>
+        </div>
+
+        <div class="qr-info" id="qrInfo">
+          <div>版本: <span id="qrVersion">-</span></div>
+          <div>纠错等级: <span id="qrEcc">-</span></div>
+          <div>矩阵大小: <span id="qrSize">-</span> × <span id="qrSize2">-</span></div>
+        </div>
+
+        <div class="download-actions" id="downloadActions" style="display:none;">
+          <button class="btn btn-primary" id="downloadPngBtn">⬇️ 下载 PNG</button>
+          <button class="btn btn-success" id="downloadSvgBtn">⬇️ 下载 SVG</button>
+          <button class="btn btn-default" id="copyBase64Btn">📋 复制 Base64</button>
+        </div>
+      </div>
+
+      <!-- ===== 控制面板 ===== -->
+      <div class="control-panel">
+        <h2>⚙️ 设置</h2>
+
+        <div class="form-group">
+          <label for="qrInput">📝 输入内容</label>
+          <textarea id="qrInput" placeholder="输入文本、URL、电话号码、WiFi 配置等...">https://github.com</textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="eccSelect">🛡️ 纠错等级</label>
+            <select id="eccSelect">
+              <option value="L">低 (7%)</option>
+              <option value="M" selected>中 (15%)</option>
+              <option value="Q">较高 (25%)</option>
+              <option value="H">高 (30%)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="sizeSlider">📐 尺寸</label>
+            <div class="size-slider-group">
+              <input type="range" id="sizeSlider" min="160" max="560" step="20" value="280">
+              <span class="size-value" id="sizeValue">280</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="fgColor">🎨 前景色</label>
+            <div class="color-input-group">
+              <input type="color" id="fgColor" value="#000000">
+              <input type="text" id="fgColorText" value="#000000">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="bgColor">🎨 背景色</label>
+            <div class="color-input-group">
+              <input type="color" id="bgColor" value="#ffffff">
+              <input type="text" id="bgColorText" value="#ffffff">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>🎯 预设配色</label>
+          <div class="preset-colors" id="presetColors"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="logoUpload">🖼️ 中心 Logo（可选）</label>
+          <div class="logo-upload-area" id="logoUploadArea">
+            <input type="file" id="logoUpload" accept="image/png,image/jpeg,image/svg+xml">
+            <div class="upload-hint">
+              <span class="icon">🖼️</span>
+              点击上传 Logo（建议 60×60px）
+            </div>
+            <img class="logo-preview" id="logoPreview" alt="Logo 预览">
+            <button class="logo-remove-btn" id="logoRemoveBtn">&times;</button>
+          </div>
+        </div>
+
+        <div class="advanced-toggle" id="advancedToggle">
+          <span>🔧</span> 高级选项
+          <span style="margin-left:auto;transition:transform 0.2s;">▼</span>
+        </div>
+
+        <div class="advanced-options" id="advancedOptions">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="dotStyle">点样式</label>
+              <select id="dotStyle">
+                <option value="square">方形</option>
+                <option value="rounded">圆角</option>
+                <option value="diamond">菱形</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="cornerStyle">角样式</label>
+              <select id="cornerStyle">
+                <option value="square">方形</option>
+                <option value="rounded">圆角</option>
+                <option value="circle">圆形</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>
+              <input type="checkbox" id="gradientToggle">
+              启用渐变色
+            </label>
+          </div>
+
+          <div class="form-row" id="gradientColors" style="display:none;">
+            <div class="form-group">
+              <label for="gradientStart">渐变起始色</label>
+              <div class="color-input-group">
+                <input type="color" id="gradientStart" value="#667eea">
+                <input type="text" id="gradientStartText" value="#667eea">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="gradientEnd">渐变结束色</label>
+              <div class="color-input-group">
+                <input type="color" id="gradientEnd" value="#764ba2">
+                <input type="text" id="gradientEndText" value="#764ba2">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== 历史记录 ===== -->
+        <div class="history-section">
+          <h3>📋 历史记录</h3>
+          <div class="history-list" id="historyList">
+            <span class="history-empty">暂无记录</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 引入模块 ===== -->
+  <script src="./config.js"></script>
+  <script src="./qrcode-lib.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
