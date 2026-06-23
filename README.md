@@ -10,7 +10,9 @@
 |------|------|------|
 | ✍️ [手写签名插件](tools/signature-pad/) | 支持鼠标 + 手写笔签名，速度感知仿真笔迹，收笔笔锋效果，可保存为 PNG base64 并自动上传 | ✅ 已完成 |
 | 📱 [二维码生成 & 解码](tools/qrcode-generator/) | 纯前端 QR 码生成与解码，支持自定义颜色/Logo/样式，可下载 PNG/SVG，支持图片上传解码、摄像头扫描 | ✅ 已完成 |
-| 🔧 更多工具 | JSON 格式化、颜色选择器等 | 🚧 开发中 |
+| 📅 [日期时间计算器](tools/date-calculator/) | 日期差计算、时间戳互转、时区转换、节假日查询、年龄计算 | ✅ 已完成 |
+| 🔐 [文本加密/编码工具箱](tools/text-encoder/) | Base64/URL/HTML 编解码、MD5/SHA 哈希、文本统计 | ✅ 已完成 |
+| 📐 [单位换算工具](tools/unit-converter/) | 12 类别 100+ 单位实时换算，支持智能识别 | ✅ 已完成 |
 
 ## 快速开始
 
@@ -39,13 +41,33 @@
     │   ├── signature-pad.css           # 样式文件
     │   ├── index.html                  # 演示页面
     │   └── USAGE.md                    # 使用文档
-    └── qrcode-generator/               # 二维码生成 & 解码
+    ├── qrcode-generator/               # 二维码生成 & 解码
+    │   ├── config.js                   # 配置模块
+    │   ├── qrcode-lib.js               # QR 码生成库（编码 + 矩阵生成）
+    │   ├── qrcode-decoder.js           # QR 码解码库（图像识别 + 解码）
+    │   ├── app.js                      # 主应用逻辑（UI 交互 + 生成 + 解码）
+    │   ├── index.html                  # 工具页面
+    │   └── USAGE.md                    # 使用文档
+    ├── date-calculator/                # 日期时间计算器
+    │   ├── config.js                   # 配置模块
+    │   ├── date-engine.js              # 日期计算引擎
+    │   ├── holiday-data.js             # 节假日数据
+    │   ├── app.js                      # 主应用逻辑
+    │   ├── index.html                  # 工具页面
+    │   └── USAGE.md                    # 使用文档
+    ├── text-encoder/                   # 文本加密/编码工具箱
+    │   ├── config.js                   # 配置模块
+    │   ├── encode-engine.js            # 编解码引擎
+    │   ├── hash-engine.js              # 哈希计算引擎
+    │   ├── stats-engine.js             # 文本统计引擎
+    │   ├── app.js                      # 主应用逻辑
+    │   └── index.html                  # 工具页面
+    └── unit-converter/                 # 单位换算工具
         ├── config.js                   # 配置模块
-        ├── qrcode-lib.js               # QR 码生成库（编码 + 矩阵生成）
-        ├── qrcode-decoder.js           # QR 码解码库（图像识别 + 解码）
-        ├── app.js                      # 主应用逻辑（UI 交互 + 生成 + 解码）
-        ├── index.html                  # 工具页面
-        └── USAGE.md                    # 使用文档
+        ├── conversion-data.js          # 换算数据
+        ├── converter-engine.js         # 换算引擎
+        ├── app.js                      # 主应用逻辑
+        └── index.html                  # 工具页面
 ```
 
 ## 开发指南
