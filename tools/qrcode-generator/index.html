@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>二维码生成器</title>
+  <title>二维码生成器 & 解码器</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -19,6 +19,47 @@
     .demo-title { text-align: center; margin-bottom: 30px; }
     .demo-title h1 { font-size: 28px; color: #1a1a1a; margin-bottom: 8px; }
     .demo-title p { color: #888; font-size: 14px; }
+
+    /* ===== 标签切换 ===== */
+    .tab-bar {
+      display: flex;
+      gap: 0;
+      margin-bottom: 24px;
+      background: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 14px 20px;
+      border: none;
+      background: transparent;
+      font-size: 15px;
+      font-weight: 600;
+      color: #999;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+      position: relative;
+    }
+
+    .tab-btn:hover { color: #666; }
+    .tab-btn.active {
+      color: #1677ff;
+      background: rgba(22, 119, 255, 0.06);
+    }
+    .tab-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 20%;
+      right: 20%;
+      height: 3px;
+      background: #1677ff;
+      border-radius: 3px 3px 0 0;
+    }
 
     /* ===== 主布局 ===== */
     .main-layout {
@@ -121,6 +162,8 @@
     .btn-default:hover { background: #e0e0e0; }
     .btn-danger { background: #ff4d4f; color: #fff; }
     .btn-danger:hover { background: #ff7875; }
+    .btn-warning { background: #faad14; color: #fff; }
+    .btn-warning:hover { background: #ffc53d; }
 
     /* ===== 控制面板 ===== */
     .control-panel {
@@ -435,6 +478,155 @@
       color: #ccc;
     }
 
+    /* ===== 解码器样式 ===== */
+    .decoder-section {
+      display: none;
+    }
+
+    .decoder-section.active {
+      display: block;
+    }
+
+    .generator-section {
+      display: block;
+    }
+
+    .generator-section.hidden {
+      display: none;
+    }
+
+    .decoder-upload-area {
+      border: 2px dashed #d9d9d9;
+      border-radius: 12px;
+      padding: 40px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 16px;
+    }
+
+    .decoder-upload-area:hover {
+      border-color: #1677ff;
+      background: rgba(22, 119, 255, 0.02);
+    }
+
+    .decoder-upload-area .upload-icon {
+      font-size: 48px;
+      display: block;
+      margin-bottom: 12px;
+    }
+
+    .decoder-upload-area .upload-text {
+      font-size: 15px;
+      color: #666;
+      margin-bottom: 4px;
+    }
+
+    .decoder-upload-area .upload-hint {
+      font-size: 12px;
+      color: #999;
+    }
+
+    .decoder-upload-area input[type="file"] {
+      display: none;
+    }
+
+    .decoder-preview-wrapper {
+      display: none;
+      margin-bottom: 16px;
+    }
+
+    .decoder-preview-wrapper.show {
+      display: block;
+    }
+
+    .decoder-preview-wrapper img {
+      max-width: 100%;
+      max-height: 300px;
+      border-radius: 8px;
+      margin: 0 auto;
+      display: block;
+    }
+
+    .decoder-result {
+      display: none;
+      margin-top: 16px;
+      padding: 16px;
+      background: #f6ffed;
+      border: 1px solid #b7eb8f;
+      border-radius: 8px;
+    }
+
+    .decoder-result.show {
+      display: block;
+    }
+
+    .decoder-result .result-label {
+      font-size: 12px;
+      color: #52c41a;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .decoder-result .result-content {
+      font-size: 14px;
+      color: #333;
+      word-break: break-all;
+      line-height: 1.6;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .decoder-result .result-actions {
+      margin-top: 12px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .decoder-error {
+      display: none;
+      margin-top: 16px;
+      padding: 12px 16px;
+      background: #fff2f0;
+      border: 1px solid #ffccc7;
+      border-radius: 8px;
+      color: #ff4d4f;
+      font-size: 14px;
+    }
+
+    .decoder-error.show {
+      display: block;
+    }
+
+    .decoder-camera-section {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid #f0f0f0;
+    }
+
+    .decoder-camera-section video {
+      width: 100%;
+      border-radius: 8px;
+      background: #000;
+      display: none;
+    }
+
+    .decoder-camera-section video.show {
+      display: block;
+    }
+
+    .decoder-camera-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .decoder-camera-actions .btn {
+      flex: 1;
+      justify-content: center;
+    }
+
     /* ===== Toast ===== */
     .qr-toast {
       position: fixed;
@@ -483,153 +675,224 @@
 <body>
   <div class="container">
     <div class="demo-title">
-      <h1>📱 二维码生成器</h1>
-      <p>纯前端实现 · 支持自定义颜色/Logo/样式 · 可下载 PNG/SVG</p>
+      <h1>📱 二维码工具</h1>
+      <p>纯前端实现 · 生成 & 解码 · 支持自定义颜色/Logo/样式</p>
+    </div>
+
+    <!-- ===== 标签栏 ===== -->
+    <div class="tab-bar">
+      <button class="tab-btn active" data-tab="generator">✨ 生成二维码</button>
+      <button class="tab-btn" data-tab="decoder">🔍 解码二维码</button>
     </div>
 
     <div class="main-layout">
       <!-- ===== 预览区 ===== -->
       <div class="preview-card">
-        <h2>🔲 二维码预览</h2>
-        <div class="qr-preview-wrapper">
-          <div class="qr-placeholder" id="qrPlaceholder">
-            <span class="icon">📱</span>
-            输入内容后自动生成二维码
+        <!-- 生成器预览 -->
+        <div class="generator-section" id="generatorSection">
+          <h2>🔲 二维码预览</h2>
+          <div class="qr-preview-wrapper">
+            <div class="qr-placeholder" id="qrPlaceholder">
+              <span class="icon">📱</span>
+              输入内容后自动生成二维码
+            </div>
+            <canvas id="qrCanvas" style="display:none;"></canvas>
           </div>
-          <canvas id="qrCanvas" style="display:none;"></canvas>
+
+          <div class="qr-info" id="qrInfo">
+            <div>版本: <span id="qrVersion">-</span></div>
+            <div>纠错等级: <span id="qrEcc">-</span></div>
+            <div>矩阵大小: <span id="qrSize">-</span> × <span id="qrSize2">-</span></div>
+          </div>
+
+          <div class="download-actions" id="downloadActions" style="display:none;">
+            <button class="btn btn-primary" id="downloadPngBtn">⬇️ 下载 PNG</button>
+            <button class="btn btn-success" id="downloadSvgBtn">⬇️ 下载 SVG</button>
+            <button class="btn btn-default" id="copyBase64Btn">📋 复制 Base64</button>
+          </div>
         </div>
 
-        <div class="qr-info" id="qrInfo">
-          <div>版本: <span id="qrVersion">-</span></div>
-          <div>纠错等级: <span id="qrEcc">-</span></div>
-          <div>矩阵大小: <span id="qrSize">-</span> × <span id="qrSize2">-</span></div>
-        </div>
+        <!-- 解码器预览 -->
+        <div class="decoder-section" id="decoderSection">
+          <h2>🔍 二维码解码</h2>
 
-        <div class="download-actions" id="downloadActions" style="display:none;">
-          <button class="btn btn-primary" id="downloadPngBtn">⬇️ 下载 PNG</button>
-          <button class="btn btn-success" id="downloadSvgBtn">⬇️ 下载 SVG</button>
-          <button class="btn btn-default" id="copyBase64Btn">📋 复制 Base64</button>
+          <div class="decoder-upload-area" id="decoderUploadArea">
+            <input type="file" id="decoderFileInput" accept="image/*">
+            <span class="upload-icon">📷</span>
+            <div class="upload-text">点击上传二维码图片</div>
+            <div class="upload-hint">支持 PNG / JPG / WEBP 格式</div>
+          </div>
+
+          <div class="decoder-preview-wrapper" id="decoderPreviewWrapper">
+            <img id="decoderPreview" alt="二维码预览">
+          </div>
+
+          <div class="decoder-result" id="decoderResult">
+            <div class="result-label">✅ 解码成功</div>
+            <div class="result-content" id="decoderResultContent"></div>
+            <div class="result-actions">
+              <button class="btn btn-primary" id="copyDecodeResultBtn">📋 复制结果</button>
+              <button class="btn btn-success" id="useDecodeResultBtn">📝 填入生成器</button>
+            </div>
+          </div>
+
+          <div class="decoder-error" id="decoderError">
+            ❌ <span id="decoderErrorText">未能识别二维码</span>
+          </div>
+
+          <div class="decoder-camera-section">
+            <h3 style="font-size:14px;color:#555;margin-bottom:10px;">📸 摄像头扫描</h3>
+            <video id="decoderVideo" autoplay playsinline></video>
+            <div class="decoder-camera-actions">
+              <button class="btn btn-primary" id="startCameraBtn">📷 开启摄像头</button>
+              <button class="btn btn-danger" id="stopCameraBtn" style="display:none;">⏹ 关闭摄像头</button>
+              <button class="btn btn-warning" id="captureFrameBtn" style="display:none;">📸 拍照扫描</button>
+            </div>
+          </div>
         </div>
       </div>
 
       <!-- ===== 控制面板 ===== -->
       <div class="control-panel">
-        <h2>⚙️ 设置</h2>
+        <!-- 生成器设置 -->
+        <div class="generator-section" id="generatorSettings">
+          <h2>⚙️ 生成设置</h2>
 
-        <div class="form-group">
-          <label for="qrInput">📝 输入内容</label>
-          <textarea id="qrInput" placeholder="输入文本、URL、电话号码、WiFi 配置等...">https://github.com</textarea>
-        </div>
-
-        <div class="form-row">
           <div class="form-group">
-            <label for="eccSelect">🛡️ 纠错等级</label>
-            <select id="eccSelect">
-              <option value="L">低 (7%)</option>
-              <option value="M" selected>中 (15%)</option>
-              <option value="Q">较高 (25%)</option>
-              <option value="H">高 (30%)</option>
-            </select>
+            <label for="qrInput">📝 输入内容</label>
+            <textarea id="qrInput" placeholder="输入文本、URL、电话号码、WiFi 配置等...">https://github.com</textarea>
           </div>
-          <div class="form-group">
-            <label for="sizeSlider">📐 尺寸</label>
-            <div class="size-slider-group">
-              <input type="range" id="sizeSlider" min="160" max="560" step="20" value="280">
-              <span class="size-value" id="sizeValue">280</span>
-            </div>
-          </div>
-        </div>
 
-        <div class="form-row">
-          <div class="form-group">
-            <label for="fgColor">🎨 前景色</label>
-            <div class="color-input-group">
-              <input type="color" id="fgColor" value="#000000">
-              <input type="text" id="fgColorText" value="#000000">
-            </div>
-          </div>
-          <div class="form-group">
-            <label for="bgColor">🎨 背景色</label>
-            <div class="color-input-group">
-              <input type="color" id="bgColor" value="#ffffff">
-              <input type="text" id="bgColorText" value="#ffffff">
-            </div>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label>🎯 预设配色</label>
-          <div class="preset-colors" id="presetColors"></div>
-        </div>
-
-        <div class="form-group">
-          <label for="logoUpload">🖼️ 中心 Logo（可选）</label>
-          <div class="logo-upload-area" id="logoUploadArea">
-            <input type="file" id="logoUpload" accept="image/png,image/jpeg,image/svg+xml">
-            <div class="upload-hint">
-              <span class="icon">🖼️</span>
-              点击上传 Logo（建议 60×60px）
-            </div>
-            <img class="logo-preview" id="logoPreview" alt="Logo 预览">
-            <button class="logo-remove-btn" id="logoRemoveBtn">&times;</button>
-          </div>
-        </div>
-
-        <div class="advanced-toggle" id="advancedToggle">
-          <span>🔧</span> 高级选项
-          <span style="margin-left:auto;transition:transform 0.2s;">▼</span>
-        </div>
-
-        <div class="advanced-options" id="advancedOptions">
           <div class="form-row">
             <div class="form-group">
-              <label for="dotStyle">点样式</label>
-              <select id="dotStyle">
-                <option value="square">方形</option>
-                <option value="rounded">圆角</option>
-                <option value="diamond">菱形</option>
+              <label for="eccSelect">🛡️ 纠错等级</label>
+              <select id="eccSelect">
+                <option value="L">低 (7%)</option>
+                <option value="M" selected>中 (15%)</option>
+                <option value="Q">较高 (25%)</option>
+                <option value="H">高 (30%)</option>
               </select>
             </div>
             <div class="form-group">
-              <label for="cornerStyle">角样式</label>
-              <select id="cornerStyle">
-                <option value="square">方形</option>
-                <option value="rounded">圆角</option>
-                <option value="circle">圆形</option>
-              </select>
+              <label for="sizeSlider">📐 尺寸</label>
+              <div class="size-slider-group">
+                <input type="range" id="sizeSlider" min="160" max="560" step="20" value="280">
+                <span class="size-value" id="sizeValue">280</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="fgColor">🎨 前景色</label>
+              <div class="color-input-group">
+                <input type="color" id="fgColor" value="#000000">
+                <input type="text" id="fgColorText" value="#000000">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="bgColor">🎨 背景色</label>
+              <div class="color-input-group">
+                <input type="color" id="bgColor" value="#ffffff">
+                <input type="text" id="bgColorText" value="#ffffff">
+              </div>
             </div>
           </div>
 
           <div class="form-group">
-            <label>
-              <input type="checkbox" id="gradientToggle">
-              启用渐变色
-            </label>
+            <label>🎯 预设配色</label>
+            <div class="preset-colors" id="presetColors"></div>
           </div>
 
-          <div class="form-row" id="gradientColors" style="display:none;">
-            <div class="form-group">
-              <label for="gradientStart">渐变起始色</label>
-              <div class="color-input-group">
-                <input type="color" id="gradientStart" value="#667eea">
-                <input type="text" id="gradientStartText" value="#667eea">
+          <div class="form-group">
+            <label for="logoUpload">🖼️ 中心 Logo（可选）</label>
+            <div class="logo-upload-area" id="logoUploadArea">
+              <input type="file" id="logoUpload" accept="image/png,image/jpeg,image/svg+xml">
+              <div class="upload-hint">
+                <span class="icon">🖼️</span>
+                点击上传 Logo（建议 60×60px）
+              </div>
+              <img class="logo-preview" id="logoPreview" alt="Logo 预览">
+              <button class="logo-remove-btn" id="logoRemoveBtn">&times;</button>
+            </div>
+          </div>
+
+          <div class="advanced-toggle" id="advancedToggle">
+            <span>🔧</span> 高级选项
+            <span style="margin-left:auto;transition:transform 0.2s;">▼</span>
+          </div>
+
+          <div class="advanced-options" id="advancedOptions">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="dotStyle">点样式</label>
+                <select id="dotStyle">
+                  <option value="square">方形</option>
+                  <option value="rounded">圆角</option>
+                  <option value="diamond">菱形</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="cornerStyle">角样式</label>
+                <select id="cornerStyle">
+                  <option value="square">方形</option>
+                  <option value="rounded">圆角</option>
+                  <option value="circle">圆形</option>
+                </select>
               </div>
             </div>
+
             <div class="form-group">
-              <label for="gradientEnd">渐变结束色</label>
-              <div class="color-input-group">
-                <input type="color" id="gradientEnd" value="#764ba2">
-                <input type="text" id="gradientEndText" value="#764ba2">
+              <label>
+                <input type="checkbox" id="gradientToggle">
+                启用渐变色
+              </label>
+            </div>
+
+            <div class="form-row" id="gradientColors" style="display:none;">
+              <div class="form-group">
+                <label for="gradientStart">渐变起始色</label>
+                <div class="color-input-group">
+                  <input type="color" id="gradientStart" value="#667eea">
+                  <input type="text" id="gradientStartText" value="#667eea">
+                </div>
               </div>
+              <div class="form-group">
+                <label for="gradientEnd">渐变结束色</label>
+                <div class="color-input-group">
+                  <input type="color" id="gradientEnd" value="#764ba2">
+                  <input type="text" id="gradientEndText" value="#764ba2">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ===== 历史记录 ===== -->
+          <div class="history-section">
+            <h3>📋 历史记录</h3>
+            <div class="history-list" id="historyList">
+              <span class="history-empty">暂无记录</span>
             </div>
           </div>
         </div>
 
-        <!-- ===== 历史记录 ===== -->
-        <div class="history-section">
-          <h3>📋 历史记录</h3>
-          <div class="history-list" id="historyList">
-            <span class="history-empty">暂无记录</span>
+        <!-- 解码器设置 -->
+        <div class="decoder-section" id="decoderSettings">
+          <h2>⚙️ 解码信息</h2>
+          <div class="form-group">
+            <label>📊 解码状态</label>
+            <div style="padding:12px;background:#f8f9fa;border-radius:8px;font-size:13px;color:#666;">
+              <div id="decoderStatus">等待上传图片...</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>📋 使用说明</label>
+            <div style="padding:12px;background:#f8f9fa;border-radius:8px;font-size:12px;color:#888;line-height:1.8;">
+              <div>1. 点击上方区域上传二维码图片</div>
+              <div>2. 或使用摄像头实时扫描</div>
+              <div>3. 解码结果将自动显示</div>
+              <div>4. 支持 PNG / JPG / WEBP 格式</div>
+            </div>
           </div>
         </div>
       </div>
@@ -639,6 +902,7 @@
   <!-- ===== 引入模块 ===== -->
   <script src="./config.js"></script>
   <script src="./qrcode-lib.js"></script>
+  <script src="./qrcode-decoder.js"></script>
   <script src="./app.js"></script>
 </body>
 </html>

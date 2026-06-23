@@ -690,12 +690,308 @@
   }
 
   // ============================================
+  // 二维码解码器
+  // ============================================
+  function QRCodeDecoder() {
+    this._decoder = new QRDecoder()
+    this._cameraStream = null
+    this._scanTimer = null
+    this._scanCanvas = null
+    this._currentResult = null
+
+    this._init()
+  }
+
+  QRCodeDecoder.prototype = {
+    constructor: QRCodeDecoder,
+
+    _init: function () {
+      this._cacheDOM()
+      this._bindEvents()
+    },
+
+    _cacheDOM: function () {
+      this.$ = {
+        uploadArea: document.getElementById('decoderUploadArea'),
+        fileInput: document.getElementById('decoderFileInput'),
+        preview: document.getElementById('decoderPreview'),
+        previewWrapper: document.getElementById('decoderPreviewWrapper'),
+        result: document.getElementById('decoderResult'),
+        resultContent: document.getElementById('decoderResultContent'),
+        error: document.getElementById('decoderError'),
+        errorText: document.getElementById('decoderErrorText'),
+        copyBtn: document.getElementById('copyDecodeResultBtn'),
+        useBtn: document.getElementById('useDecodeResultBtn'),
+        video: document.getElementById('decoderVideo'),
+        startCamera: document.getElementById('startCameraBtn'),
+        stopCamera: document.getElementById('stopCameraBtn'),
+        captureFrame: document.getElementById('captureFrameBtn'),
+        status: document.getElementById('decoderStatus')
+      }
+    },
+
+    _bindEvents: function () {
+      var self = this
+
+      // 上传区域点击
+      this.$.uploadArea.addEventListener('click', function () {
+        self.$.fileInput.click()
+      })
+
+      // 文件选择
+      this.$.fileInput.addEventListener('change', function (e) {
+        var file = e.target.files[0]
+        if (file) {
+          self._decodeFile(file)
+        }
+      })
+
+      // 拖拽上传
+      this.$.uploadArea.addEventListener('dragover', function (e) {
+        e.preventDefault()
+        this.style.borderColor = '#1677ff'
+        this.style.background = 'rgba(22, 119, 255, 0.02)'
+      })
+
+      this.$.uploadArea.addEventListener('dragleave', function (e) {
+        e.preventDefault()
+        this.style.borderColor = '#d9d9d9'
+        this.style.background = ''
+      })
+
+      this.$.uploadArea.addEventListener('drop', function (e) {
+        e.preventDefault()
+        this.style.borderColor = '#d9d9d9'
+        this.style.background = ''
+        var file = e.dataTransfer.files[0]
+        if (file && file.type.match(/image\//)) {
+          self._decodeFile(file)
+        } else {
+          QRToast.warning('请拖入图片文件')
+        }
+      })
+
+      // 复制结果
+      this.$.copyBtn.addEventListener('click', function () {
+        if (self._currentResult) {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(self._currentResult).then(function () {
+              QRToast.success('已复制到剪贴板')
+            }).catch(function () {
+              self._fallbackCopy(self._currentResult)
+            })
+          } else {
+            self._fallbackCopy(self._currentResult)
+          }
+        }
+      })
+
+      // 填入生成器
+      this.$.useBtn.addEventListener('click', function () {
+        if (self._currentResult) {
+          var input = document.getElementById('qrInput')
+          if (input) {
+            input.value = self._currentResult
+            // 切换到生成器标签
+            document.querySelector('[data-tab="generator"]').click()
+            // 触发生成
+            var event = new Event('input', { bubbles: true })
+            input.dispatchEvent(event)
+            QRToast.success('已填入生成器')
+          }
+        }
+      })
+
+      // 摄像头
+      this.$.startCamera.addEventListener('click', function () {
+        self._startCamera()
+      })
+
+      this.$.stopCamera.addEventListener('click', function () {
+        self._stopCamera()
+      })
+
+      this.$.captureFrame.addEventListener('click', function () {
+        self._captureFrame()
+      })
+    },
+
+    _decodeFile: function (file) {
+      var self = this
+
+      // 显示预览
+      var reader = new FileReader()
+      reader.onload = function (e) {
+        var dataURL = e.target.result
+        self.$.preview.src = dataURL
+        self.$.previewWrapper.classList.add('show')
+        self.$.result.classList.remove('show')
+        self.$.error.classList.remove('show')
+        self.$.status.textContent = '正在解码...'
+
+        // 解码
+        self._decoder.decodeFromDataURL(dataURL, function (result, error) {
+          if (result) {
+            self._showResult(result)
+          } else {
+            self._showError(error || '未能识别二维码')
+          }
+        })
+      }
+      reader.readAsDataURL(file)
+    },
+
+    _showResult: function (text) {
+      this._currentResult = text
+      this.$.resultContent.textContent = text
+      this.$.result.classList.add('show')
+      this.$.error.classList.remove('show')
+      this.$.status.textContent = '✅ 解码成功'
+      QRToast.success('二维码解码成功')
+    },
+
+    _showError: function (message) {
+      this._currentResult = null
+      this.$.errorText.textContent = message
+      this.$.error.classList.add('show')
+      this.$.result.classList.remove('show')
+      this.$.status.textContent = '❌ ' + message
+      QRToast.error(message)
+    },
+
+    _fallbackCopy: function (text) {
+      var textarea = document.createElement('textarea')
+      textarea.value = text
+      textarea.style.position = 'fixed'
+      textarea.style.opacity = '0'
+      document.body.appendChild(textarea)
+      textarea.select()
+      try {
+        document.execCommand('copy')
+        QRToast.success('已复制到剪贴板')
+      } catch (e) {
+        QRToast.error('复制失败，请手动复制')
+      }
+      document.body.removeChild(textarea)
+    },
+
+    _startCamera: function () {
+      var self = this
+
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        QRToast.error('您的浏览器不支持摄像头访问')
+        return
+      }
+
+      navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment', width: { ideal: 640 }, height: { ideal: 480 } }
+      }).then(function (stream) {
+        self._cameraStream = stream
+        self.$.video.srcObject = stream
+        self.$.video.classList.add('show')
+        self.$.startCamera.style.display = 'none'
+        self.$.stopCamera.style.display = 'block'
+        self.$.captureFrame.style.display = 'block'
+
+        // 创建扫描 Canvas
+        self._scanCanvas = document.createElement('canvas')
+        self.$.status.textContent = '📷 摄像头已开启，点击拍照扫描'
+
+      }).catch(function (err) {
+        QRToast.error('无法访问摄像头: ' + err.message)
+      })
+    },
+
+    _stopCamera: function () {
+      if (this._cameraStream) {
+        this._cameraStream.getTracks().forEach(function (track) { track.stop() })
+        this._cameraStream = null
+      }
+
+      if (this._scanTimer) {
+        clearInterval(this._scanTimer)
+        this._scanTimer = null
+      }
+
+      this.$.video.classList.remove('show')
+      this.$.video.srcObject = null
+      this.$.startCamera.style.display = 'block'
+      this.$.stopCamera.style.display = 'none'
+      this.$.captureFrame.style.display = 'none'
+      this.$.status.textContent = '摄像头已关闭'
+    },
+
+    _captureFrame: function () {
+      var video = this.$.video
+      var canvas = this._scanCanvas
+
+      if (!video || !canvas) return
+
+      canvas.width = video.videoWidth
+      canvas.height = video.videoHeight
+
+      var ctx = canvas.getContext('2d')
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+
+      // 显示捕获的帧
+      var dataURL = canvas.toDataURL('image/jpeg')
+      this.$.preview.src = dataURL
+      this.$.previewWrapper.classList.add('show')
+      this.$.result.classList.remove('show')
+      this.$.error.classList.remove('show')
+      this.$.status.textContent = '正在解码...'
+
+      // 解码
+      var self = this
+      this._decoder.decodeFromDataURL(dataURL, function (result, error) {
+        if (result) {
+          self._showResult(result)
+        } else {
+          self._showError(error || '未能识别二维码')
+        }
+      })
+    }
+  }
+
+  // ============================================
+  // 标签切换
+  // ============================================
+  function initTabs() {
+    var tabs = document.querySelectorAll('.tab-btn')
+
+    tabs.forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        var target = this.dataset.tab
+
+        // 更新标签状态
+        tabs.forEach(function (t) { t.classList.remove('active') })
+        this.classList.add('active')
+
+        // 切换生成器/解码器
+        var genSections = document.querySelectorAll('.generator-section')
+        var decSections = document.querySelectorAll('.decoder-section')
+
+        if (target === 'generator') {
+          genSections.forEach(function (s) { s.classList.remove('hidden') })
+          decSections.forEach(function (s) { s.classList.remove('active') })
+        } else {
+          genSections.forEach(function (s) { s.classList.add('hidden') })
+          decSections.forEach(function (s) { s.classList.add('active') })
+        }
+      })
+    })
+  }
+
+  // ============================================
   // 初始化
   // ============================================
   global.QRGenerator = QRGenerator
+  global.QRCodeDecoder = QRCodeDecoder
 
   document.addEventListener('DOMContentLoaded', function () {
+    initTabs()
     global._qrGenerator = new QRGenerator()
+    global._qrDecoder = new QRCodeDecoder()
   })
 
 })(typeof window !== 'undefined' ? window : this)
