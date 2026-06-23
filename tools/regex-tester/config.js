@@ -126,12 +126,21 @@
       ]}
     ],
 
+    // ===== 正则查询配置 =====
+    QUERY: {
+      debounceMs: 200,
+      maxResults: 100,
+      placeholder: '🔍 搜索正则名称、描述或内容...',
+      emptyText: '输入关键词搜索常用正则表达式'
+    },
+
     // ===== localStorage 键名 =====
     STORAGE_KEYS: {
       history: 'rt_history',
       lastPattern: 'rt_last_pattern',
       lastFlags: 'rt_last_flags',
-      lastTestText: 'rt_last_test_text'
+      lastTestText: 'rt_last_test_text',
+      lastQuery: 'rt_last_query'
     },
 
     // ===== 历史记录最大数量 =====

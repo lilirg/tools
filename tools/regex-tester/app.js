@@ -1,14 +1,15 @@
 /**
  * Regex Tester - UI 交互层
- * 处理所有 UI 交互、实时匹配、替换测试、模板选择
+ * 处理所有 UI 交互、实时匹配、替换测试、模板选择、正则查询
  *
- * 依赖: RegexConfig, RegexEngine
+ * 依赖: RegexConfig, RegexEngine, RegexQuery
  */
 ;(function (global) {
   'use strict'
 
   var Config = global.RegexConfig
   var RegexEngine = global.RegexEngine
+  var RegexQuery = global.RegexQuery
 
   // ============================================
   // Toast 提示
@@ -89,6 +90,309 @@
   }
 
   // ============================================
+  // 正则查询控制器
+  // ============================================
+  var RegexQueryController = {
+    _searchTimer: null,
+    _currentCategory: '',
+    _currentResults: [],
+
+    init: function () {
+      this._cacheDOM()
+      this._initCategoryFilter()
+      this._bindEvents()
+      this._loadSavedQuery()
+      this._updateTotalCount()
+    },
+
+    _cacheDOM: function () {
+      this.$ = {
+        searchInput: document.getElementById('rqSearchInput'),
+        categoryFilter: document.getElementById('rqCategoryFilter'),
+        statsText: document.getElementById('rqStatsText'),
+        totalCount: document.getElementById('rqTotalCount'),
+        results: document.getElementById('rqResults')
+      }
+    },
+
+    _initCategoryFilter: function () {
+      var container = this.$.categoryFilter
+      if (!container) return
+
+      var categories = RegexQuery.getCategories()
+      var html = '<button class="rq-category-btn active" data-category="">全部</button>'
+
+      categories.forEach(function (cat) {
+        html += '<button class="rq-category-btn" data-category="' + cat + '">' + cat + '</button>'
+      })
+
+      container.innerHTML = html
+    },
+
+    _bindEvents: function () {
+      var self = this
+
+      // 搜索输入
+      if (this.$.searchInput) {
+        this.$.searchInput.addEventListener('input', function () {
+          clearTimeout(self._searchTimer)
+          self._searchTimer = setTimeout(function () {
+            self._doSearch()
+            self._saveQuery()
+          }, Config.QUERY.debounceMs)
+        })
+      }
+
+      // 分类过滤
+      if (this.$.categoryFilter) {
+        this.$.categoryFilter.addEventListener('click', function (e) {
+          var btn = e.target
+          if (btn.classList.contains('rq-category-btn')) {
+            // 更新激活状态
+            var btns = self.$.categoryFilter.querySelectorAll('.rq-category-btn')
+            btns.forEach(function (b) { b.classList.remove('active') })
+            btn.classList.add('active')
+
+            self._currentCategory = btn.getAttribute('data-category') || ''
+            self._doSearch()
+          }
+        })
+      }
+    },
+
+    _doSearch: function () {
+      var self = this
+      var keyword = this.$.searchInput ? this.$.searchInput.value : ''
+      var results = []
+
+      if (keyword.trim()) {
+        // 有关键词时搜索
+        results = RegexQuery.search(keyword)
+      } else if (this._currentCategory) {
+        // 无关键词但有分类过滤
+        results = RegexQuery.getByCategory(this._currentCategory).map(function (item) {
+          return {
+            category: self._currentCategory,
+            name: item.name,
+            pattern: item.pattern,
+            desc: item.desc,
+            matchField: ''
+          }
+        })
+      }
+
+      // 如果选择了分类，进一步过滤
+      if (this._currentCategory && results.length > 0) {
+        results = results.filter(function (r) {
+          return r.category === self._currentCategory
+        })
+      }
+
+      this._currentResults = results
+      this._renderResults(results, keyword)
+      this._updateStats(results.length, keyword)
+    },
+
+    _renderResults: function (results, keyword) {
+      var container = this.$.results
+      if (!container) return
+
+      if (!results || results.length === 0) {
+        if (keyword && keyword.trim()) {
+          container.innerHTML = '<div class="rq-empty">' +
+            '<span class="rq-empty-icon">😕</span>' +
+            '<div class="rq-empty-text">未找到匹配 "' + this._escapeHtml(keyword) + '" 的正则表达式</div>' +
+            '</div>'
+        } else {
+          container.innerHTML = '<div class="rq-empty">' +
+            '<span class="rq-empty-icon">🔍</span>' +
+            '<div class="rq-empty-text">输入关键词搜索常用正则表达式<br>支持按名称、描述、正则内容搜索</div>' +
+            '</div>'
+        }
+        return
+      }
+
+      var html = ''
+      var self = this
+
+      results.forEach(function (item, index) {
+        var highlightedName = self._highlightKeyword(item.name, keyword)
+        var highlightedDesc = self._highlightKeyword(item.desc, keyword)
+        var highlightedPattern = self._highlightKeyword(item.pattern, keyword)
+
+        html += '<div class="rq-result-item" data-index="' + index + '">'
+        html += '<div class="rq-result-header">'
+        html += '<span class="rq-result-name">' + highlightedName + '</span>'
+        html += '<span class="rq-result-category">' + item.category + '</span>'
+        html += '</div>'
+        html += '<div class="rq-result-desc">' + highlightedDesc + '</div>'
+        html += '<div class="rq-result-pattern">' + highlightedPattern + '</div>'
+        html += '<div class="rq-result-actions">'
+        html += '<button class="rq-use-btn" data-index="' + index + '">📋 使用此正则</button>'
+        html += '<button class="rq-copy-btn" data-index="' + index + '">📄 复制正则</button>'
+        html += '</div>'
+        html += '</div>'
+      })
+
+      container.innerHTML = html
+
+      // 绑定按钮事件
+      container.querySelectorAll('.rq-use-btn').forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+          e.stopPropagation()
+          var idx = parseInt(this.getAttribute('data-index'), 10)
+          self._useRegex(idx)
+        })
+      })
+
+      container.querySelectorAll('.rq-copy-btn').forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+          e.stopPropagation()
+          var idx = parseInt(this.getAttribute('data-index'), 10)
+          self._copyRegex(idx)
+        })
+      })
+
+      // 点击整行也使用正则
+      container.querySelectorAll('.rq-result-item').forEach(function (item) {
+        item.addEventListener('click', function () {
+          var idx = parseInt(this.getAttribute('data-index'), 10)
+          self._useRegex(idx)
+        })
+      })
+    },
+
+    _useRegex: function (index) {
+      var item = this._currentResults[index]
+      if (!item) return
+
+      // 设置到正则输入框
+      var patternInput = document.getElementById('patternInput')
+      if (patternInput) {
+        patternInput.value = item.pattern
+        // 触发 input 事件
+        var event = new Event('input', { bubbles: true })
+        patternInput.dispatchEvent(event)
+      }
+
+      // 设置 g 标志为默认选中
+      var flagCheckboxes = document.querySelectorAll('.rt-flag-checkbox')
+      flagCheckboxes.forEach(function (cb) {
+        cb.checked = cb.value === 'g'
+      })
+
+      // 触发 change 事件
+      flagCheckboxes.forEach(function (cb) {
+        var event = new Event('change', { bubbles: true })
+        cb.dispatchEvent(event)
+      })
+
+      // 滚动到正则输入区域
+      var patternCard = document.querySelector('.card:nth-child(3)')
+      if (patternCard) {
+        patternCard.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }
+
+      // 显示提示
+      if (typeof RTToast !== 'undefined') {
+        RTToast.success('已加载: ' + item.name)
+      }
+    },
+
+    _copyRegex: function (index) {
+      var item = this._currentResults[index]
+      if (!item) return
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(item.pattern).then(function () {
+          if (typeof RTToast !== 'undefined') {
+            RTToast.success('已复制正则表达式')
+          }
+        }).catch(function () {
+          // fallback
+          self._fallbackCopy(item.pattern)
+        })
+      } else {
+        this._fallbackCopy(item.pattern)
+      }
+    },
+
+    _fallbackCopy: function (text) {
+      var textarea = document.createElement('textarea')
+      textarea.value = text
+      textarea.style.position = 'fixed'
+      textarea.style.opacity = '0'
+      document.body.appendChild(textarea)
+      textarea.select()
+      try {
+        document.execCommand('copy')
+        if (typeof RTToast !== 'undefined') {
+          RTToast.success('已复制正则表达式')
+        }
+      } catch (e) {
+        if (typeof RTToast !== 'undefined') {
+          RTToast.error('复制失败，请手动复制')
+        }
+      }
+      document.body.removeChild(textarea)
+    },
+
+    _updateStats: function (count, keyword) {
+      if (this.$.statsText) {
+        if (keyword && keyword.trim()) {
+          this.$.statsText.textContent = '找到 ' + count + ' 条结果'
+        } else if (this._currentCategory) {
+          this.$.statsText.textContent = this._currentCategory + ' - ' + count + ' 条'
+        } else {
+          this.$.statsText.textContent = '输入关键词开始搜索'
+        }
+      }
+    },
+
+    _updateTotalCount: function () {
+      if (this.$.totalCount) {
+        var total = RegexQuery.getTotalCount()
+        this.$.totalCount.textContent = '共 ' + total + ' 条正则'
+      }
+    },
+
+    _highlightKeyword: function (text, keyword) {
+      if (!keyword || !keyword.trim()) {
+        return this._escapeHtml(text)
+      }
+      var escaped = this._escapeHtml(text)
+      var kw = this._escapeHtml(keyword.trim())
+      var regex = new RegExp('(' + kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi')
+      return escaped.replace(regex, '<span class="rq-match-highlight">$1</span>')
+    },
+
+    _escapeHtml: function (str) {
+      return String(str).replace(/&/g, '&')
+        .replace(/</g, '<')
+        .replace(/>/g, '>')
+        .replace(/"/g, '"')
+    },
+
+    _saveQuery: function () {
+      try {
+        if (this.$.searchInput) {
+          localStorage.setItem(Config.STORAGE_KEYS.lastQuery, this.$.searchInput.value)
+        }
+      } catch (e) {}
+    },
+
+    _loadSavedQuery: function () {
+      try {
+        var lastQuery = localStorage.getItem(Config.STORAGE_KEYS.lastQuery)
+        if (lastQuery && this.$.searchInput) {
+          this.$.searchInput.value = lastQuery
+          this._doSearch()
+        }
+      } catch (e) {}
+    }
+  }
+
+  // ============================================
   // 正则测试主应用
   // ============================================
   function RegexTesterApp() {
@@ -107,6 +411,8 @@
       this._bindEvents()
       this._loadHistory()
       this._doTest()
+      // 初始化正则查询
+      RegexQueryController.init()
     },
 
     // ============================================

@@ -15,7 +15,7 @@
 | 📐 [单位换算工具](tools/unit-converter/) | 12 类别 100+ 单位实时换算，支持智能识别 | ✅ 已完成 |
 | 🎨 [颜色选择器 & 调色板](tools/color-picker/) | 颜色拾取器（HSL/RGB/HEX/HSV）、配色方案生成、图片取色、对比度检测 | ✅ 已完成 |
 | 🔄 [JSON 格式化 & 对比](tools/json-formatter/) | JSON 格式化/压缩/校验、语法高亮、差异对比、路径查询、JSON/CSV 互转 | ✅ 已完成 |
-| ⏱️ [正则表达式测试工具](tools/regex-tester/) | 正则实时匹配与高亮、捕获组展示、替换测试、常用模板库、语法速查表 | ✅ 已完成 |
+| ⏱️ [正则表达式测试工具](tools/regex-tester/) | 正则实时匹配与高亮、捕获组展示、替换测试、常用模板库、语法速查表、100+ 常用正则查询 | ✅ 已完成 |
 | 🖼️ [图片压缩 & 格式转换](tools/image-tool/) | 图片压缩、PNG/JPEG/WebP/BMP 格式互转、尺寸调整、批量处理 | ✅ 已完成 |
 | 📝 [Markdown 预览 & 编辑](tools/markdown-editor/) | 实时 Markdown 预览、工具栏快捷插入、常用模板、深色主题、导出 HTML | ✅ 已完成 |
 | 🌐 [IP / 网络信息查询](tools/ip-tool/) | IP 地址查询与验证、CIDR 计算、子网划分、本机网络信息、参考速查表 | ✅ 已完成 |
@@ -91,6 +91,7 @@
     └── regex-tester/                   # 正则表达式测试工具
         ├── config.js                   # 配置模块
         ├── regex-engine.js             # 正则匹配/替换引擎
+        ├── regex-query.js              # 常用正则查询引擎（100+ 正则）
         ├── app.js                      # UI 交互层
         ├── index.html                  # 工具页面
         └── USAGE.md                    # 使用文档

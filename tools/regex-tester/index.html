@@ -43,6 +43,195 @@
       margin-bottom: 12px;
     }
 
+    /* ===== 正则查询 ===== */
+    .rq-search-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .rq-search-row input {
+      flex: 1;
+      padding: 10px 14px;
+      border: 2px solid #d9d9d9;
+      border-radius: 8px;
+      font-size: 15px;
+      font-family: inherit;
+      background: #f8f9fa;
+      transition: border-color 0.2s;
+    }
+
+    .rq-search-row input:focus {
+      outline: none;
+      border-color: #1677ff;
+      box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.1);
+    }
+
+    .rq-category-filter {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .rq-category-btn {
+      padding: 4px 12px;
+      border: 1px solid #d9d9d9;
+      border-radius: 16px;
+      font-size: 12px;
+      cursor: pointer;
+      background: #fff;
+      color: #666;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+
+    .rq-category-btn:hover {
+      border-color: #1677ff;
+      color: #1677ff;
+    }
+
+    .rq-category-btn.active {
+      background: #1677ff;
+      color: #fff;
+      border-color: #1677ff;
+    }
+
+    .rq-stats-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      font-size: 13px;
+      color: #999;
+    }
+
+    .rq-results {
+      max-height: 400px;
+      overflow-y: auto;
+      border: 1px solid #f0f0f0;
+      border-radius: 8px;
+    }
+
+    .rq-result-item {
+      padding: 12px 14px;
+      border-bottom: 1px solid #f5f5f5;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .rq-result-item:last-child { border-bottom: none; }
+    .rq-result-item:hover { background: #f8f9ff; }
+
+    .rq-result-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .rq-result-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .rq-result-category {
+      font-size: 11px;
+      padding: 1px 8px;
+      background: #e6f7ff;
+      color: #1677ff;
+      border-radius: 10px;
+      white-space: nowrap;
+    }
+
+    .rq-result-desc {
+      font-size: 12px;
+      color: #888;
+      margin-bottom: 6px;
+      line-height: 1.4;
+    }
+
+    .rq-result-pattern {
+      font-size: 12px;
+      font-family: 'Courier New', monospace;
+      color: #52c41a;
+      background: #f6ffed;
+      padding: 4px 8px;
+      border-radius: 4px;
+      word-break: break-all;
+      line-height: 1.5;
+    }
+
+    .rq-result-pattern .rq-highlight {
+      background: #ffd43b;
+      padding: 0 2px;
+      border-radius: 2px;
+    }
+
+    .rq-result-actions {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .rq-use-btn {
+      padding: 3px 10px;
+      border: none;
+      border-radius: 4px;
+      font-size: 11px;
+      cursor: pointer;
+      background: #1677ff;
+      color: #fff;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+
+    .rq-use-btn:hover {
+      background: #4096ff;
+    }
+
+    .rq-copy-btn {
+      padding: 3px 10px;
+      border: 1px solid #d9d9d9;
+      border-radius: 4px;
+      font-size: 11px;
+      cursor: pointer;
+      background: #fff;
+      color: #666;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+
+    .rq-copy-btn:hover {
+      border-color: #1677ff;
+      color: #1677ff;
+    }
+
+    .rq-empty {
+      text-align: center;
+      padding: 30px 20px;
+      color: #ccc;
+      font-size: 14px;
+    }
+
+    .rq-empty-icon {
+      font-size: 36px;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .rq-empty-text {
+      font-size: 13px;
+      color: #bbb;
+    }
+
+    .rq-match-highlight {
+      background: #ffd43b;
+      padding: 0 2px;
+      border-radius: 2px;
+    }
+
     /* ===== 模板选择 ===== */
     .template-row {
       margin-bottom: 16px;
@@ -551,6 +740,25 @@
       </div>
     </div>
 
+    <!-- ===== 常用正则查询 ===== -->
+    <div class="card">
+      <h2>🔍 常用正则查询</h2>
+      <div class="rq-search-row">
+        <input type="text" id="rqSearchInput" placeholder="搜索正则名称、描述或内容..." spellcheck="false">
+      </div>
+      <div class="rq-category-filter" id="rqCategoryFilter"></div>
+      <div class="rq-stats-bar">
+        <span id="rqStatsText">输入关键词开始搜索</span>
+        <span id="rqTotalCount"></span>
+      </div>
+      <div class="rq-results" id="rqResults">
+        <div class="rq-empty">
+          <span class="rq-empty-icon">🔍</span>
+          <div class="rq-empty-text">输入关键词搜索常用正则表达式<br>支持按名称、描述、正则内容搜索</div>
+        </div>
+      </div>
+    </div>
+
     <!-- ===== 正则输入 ===== -->
     <div class="card">
       <h2>🔤 正则表达式</h2>
@@ -627,6 +835,7 @@
   <!-- ===== 引入模块（顺序重要） ===== -->
   <script src="./config.js"></script>
   <script src="./regex-engine.js"></script>
+  <script src="./regex-query.js"></script>
   <script src="./app.js"></script>
 </body>
 </html>
