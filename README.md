@@ -16,6 +16,9 @@
 | 🎨 [颜色选择器 & 调色板](tools/color-picker/) | 颜色拾取器（HSL/RGB/HEX/HSV）、配色方案生成、图片取色、对比度检测 | ✅ 已完成 |
 | 🔄 [JSON 格式化 & 对比](tools/json-formatter/) | JSON 格式化/压缩/校验、语法高亮、差异对比、路径查询、JSON/CSV 互转 | ✅ 已完成 |
 | ⏱️ [正则表达式测试工具](tools/regex-tester/) | 正则实时匹配与高亮、捕获组展示、替换测试、常用模板库、语法速查表 | ✅ 已完成 |
+| 🖼️ [图片压缩 & 格式转换](tools/image-tool/) | 图片压缩、PNG/JPEG/WebP/BMP 格式互转、尺寸调整、批量处理 | ✅ 已完成 |
+| 📝 [Markdown 预览 & 编辑](tools/markdown-editor/) | 实时 Markdown 预览、工具栏快捷插入、常用模板、深色主题、导出 HTML | ✅ 已完成 |
+| 🌐 [IP / 网络信息查询](tools/ip-tool/) | IP 地址查询与验证、CIDR 计算、子网划分、本机网络信息、参考速查表 | ✅ 已完成 |
 
 ## 快速开始
 
@@ -88,6 +91,24 @@
     └── regex-tester/                   # 正则表达式测试工具
         ├── config.js                   # 配置模块
         ├── regex-engine.js             # 正则匹配/替换引擎
+        ├── app.js                      # UI 交互层
+        ├── index.html                  # 工具页面
+        └── USAGE.md                    # 使用文档
+    ├── image-tool/                     # 图片压缩 & 格式转换
+    │   ├── config.js                   # 配置模块
+    │   ├── image-engine.js             # 图片处理引擎
+    │   ├── app.js                      # UI 交互层
+    │   ├── index.html                  # 工具页面
+    │   └── USAGE.md                    # 使用文档
+    ├── markdown-editor/                # Markdown 预览 & 编辑
+    │   ├── config.js                   # 配置模块
+    │   ├── markdown-engine.js          # Markdown 解析引擎
+    │   ├── app.js                      # UI 交互层
+    │   ├── index.html                  # 工具页面
+    │   └── USAGE.md                    # 使用文档
+    └── ip-tool/                        # IP / 网络信息查询
+        ├── config.js                   # 配置模块
+        ├── network-engine.js           # 网络计算引擎
         ├── app.js                      # UI 交互层
         ├── index.html                  # 工具页面
         └── USAGE.md                    # 使用文档

@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>📝 Markdown 预览 & 编辑</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      min-height: 100vh;
+      padding: 20px;
+      transition: background 0.3s;
+    }
+
+    body.dark-theme {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    }
+
+    .container { max-width: 1200px; margin: 0 auto; }
+
+    .demo-title { text-align: center; margin-bottom: 30px; }
+    .demo-title h1 { font-size: 28px; color: #1a1a1a; margin-bottom: 8px; }
+    .demo-title p { color: #888; font-size: 14px; }
+    body.dark-theme .demo-title h1 { color: #e0e0e0; }
+    body.dark-theme .demo-title p { color: #888; }
+
+    /* ===== 卡片 ===== */
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      margin-bottom: 20px;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    body.dark-theme .card {
+      background: #1e1e2f;
+      color: #e0e0e0;
+    }
+
+    .card h2 {
+      font-size: 16px;
+      color: #333;
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    body.dark-theme .card h2 {
+      color: #e0e0e0;
+      border-bottom-color: #333;
+    }
+
+    .card h3 {
+      font-size: 14px;
+      color: #555;
+      margin-bottom: 12px;
+    }
+
+    body.dark-theme .card h3 { color: #aaa; }
+
+    /* ===== 工具栏 ===== */
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-bottom: 12px;
+      padding: 8px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border: 1px solid #e8e8e8;
+    }
+
+    body.dark-theme .toolbar {
+      background: #2a2a3e;
+      border-color: #333;
+    }
+
+    .toolbar-btn {
+      width: 36px;
+      height: 36px;
+      border: 1px solid transparent;
+      background: transparent;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #555;
+    }
+
+    .toolbar-btn:hover {
+      background: #e8e8e8;
+      border-color: #d9d9d9;
+    }
+
+    body.dark-theme .toolbar-btn {
+      color: #aaa;
+    }
+    body.dark-theme .toolbar-btn:hover {
+      background: #3a3a4e;
+      border-color: #555;
+    }
+
+    .toolbar-separator {
+      width: 1px;
+      background: #e0e0e0;
+      margin: 4px 4px;
+    }
+
+    body.dark-theme .toolbar-separator {
+      background: #444;
+    }
+
+    /* ===== 选项栏 ===== */
+    .options-bar {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .options-bar .form-group {
+      margin-bottom: 0;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: #666;
+      margin-bottom: 4px;
+    }
+
+    body.dark-theme .form-group label { color: #aaa; }
+
+    .form-group select {
+      padding: 6px 10px;
+      border: 1px solid #d9d9d9;
+      border-radius: 6px;
+      font-size: 12px;
+      transition: border-color 0.2s;
+      font-family: inherit;
+      background: #fff;
+    }
+
+    body.dark-theme .form-group select {
+      background: #2a2a3e;
+      border-color: #444;
+      color: #e0e0e0;
+    }
+
+    .form-group select:focus {
+      outline: none;
+      border-color: #1677ff;
+      box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.1);
+    }
+
+    /* ===== 编辑器与预览 ===== */
+    .editor-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .editor-pane,
+    .preview-pane {
+      min-height: 500px;
+    }
+
+    .pane-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .pane-header label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #555;
+    }
+
+    body.dark-theme .pane-header label { color: #aaa; }
+
+    .pane-header .word-count {
+      font-size: 12px;
+      color: #999;
+    }
+
+    #editor {
+      width: 100%;
+      min-height: 460px;
+      padding: 16px;
+      border: 1px solid #d9d9d9;
+      border-radius: 8px;
+      font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+      font-size: 14px;
+      line-height: 1.6;
+      resize: vertical;
+      transition: border-color 0.2s;
+      background: #fafafa;
+      color: #333;
+    }
+
+    #editor:focus {
+      outline: none;
+      border-color: #1677ff;
+      box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.1);
+    }
+
+    body.dark-theme #editor {
+      background: #1a1a2e;
+      border-color: #333;
+      color: #e0e0e0;
+    }
+
+    body.dark-theme #editor:focus {
+      border-color: #4096ff;
+      box-shadow: 0 0 0 2px rgba(64, 150, 255, 0.15);
+    }
+
+    #previewContainer {
+      min-height: 460px;
+      padding: 16px;
+      border: 1px solid #e8e8e8;
+      border-radius: 8px;
+      overflow-y: auto;
+      background: #fff;
+    }
+
+    body.dark-theme #previewContainer {
+      background: #1a1a2e;
+      border-color: #333;
+    }
+
+    /* ===== 预览样式 ===== */
+    #preview h1 { font-size: 28px; margin: 0 0 16px; padding-bottom: 8px; border-bottom: 1px solid #eee; }
+    #preview h2 { font-size: 24px; margin: 24px 0 12px; }
+    #preview h3 { font-size: 20px; margin: 20px 0 10px; }
+    #preview h4 { font-size: 16px; margin: 16px 0 8px; }
+    #preview h5 { font-size: 14px; margin: 14px 0 6px; }
+    #preview h6 { font-size: 12px; margin: 12px 0 6px; color: #888; }
+    #preview p { margin: 0 0 12px; line-height: 1.7; }
+    #preview a { color: #1677ff; text-decoration: none; }
+    #preview a:hover { text-decoration: underline; }
+    #preview img { max-width: 100%; border-radius: 6px; margin: 8px 0; }
+    #preview code {
+      background: #f0f0f0;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 0.9em;
+      font-family: 'SF Mono', 'Consolas', monospace;
+    }
+    #preview pre {
+      background: #f6f8fa;
+      padding: 16px;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 12px 0;
+      border: 1px solid #e8e8e8;
+    }
+    #preview pre code {
+      background: none;
+      padding: 0;
+      border-radius: 0;
+    }
+    #preview blockquote {
+      border-left: 4px solid #1677ff;
+      padding: 8px 16px;
+      margin: 12px 0;
+      background: #f8f9fa;
+      border-radius: 0 6px 6px 0;
+      color: #666;
+    }
+    #preview table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 12px 0;
+    }
+    #preview th, #preview td {
+      border: 1px solid #dfe2e5;
+      padding: 8px 12px;
+      text-align: left;
+    }
+    #preview th {
+      background: #f6f8fa;
+      font-weight: 600;
+    }
+    #preview ul, #preview ol {
+      margin: 8px 0;
+      padding-left: 24px;
+    }
+    #preview li { margin: 4px 0; }
+    #preview hr { border: none; border-top: 2px solid #e8e8e8; margin: 24px 0; }
+    #preview .task-item { list-style: none; margin-left: -24px; }
+    #preview .task-item input { margin-right: 8px; }
+
+    body.dark-theme #preview h1 { border-bottom-color: #333; }
+    body.dark-theme #preview h6 { color: #888; }
+    body.dark-theme #preview a { color: #4096ff; }
+    body.dark-theme #preview code { background: #2a2a3e; color: #e0e0e0; }
+    body.dark-theme #preview pre { background: #1a1a2e; border-color: #333; }
+    body.dark-theme #preview blockquote { background: #1e1e2f; color: #aaa; }
+    body.dark-theme #preview th { background: #2a2a3e; }
+    body.dark-theme #preview th, body.dark-theme #preview td { border-color: #444; }
+    body.dark-theme #preview hr { border-top-color: #333; }
+
+    /* ===== 按钮 ===== */
+    .btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+    }
+
+    .btn:hover { transform: translateY(-1px); }
+    .btn:active { transform: scale(0.98); }
+    .btn-primary { background: #1677ff; color: #fff; }
+    .btn-primary:hover { background: #4096ff; }
+    .btn-success { background: #52c41a; color: #fff; }
+    .btn-success:hover { background: #73d13d; }
+    .btn-default { background: #f0f0f0; color: #666; }
+    .btn-default:hover { background: #e0e0e0; }
+    .btn-danger { background: #ff4d4f; color: #fff; }
+    .btn-danger:hover { background: #ff7875; }
+    .btn-small { padding: 6px 12px; font-size: 12px; }
+
+    body.dark-theme .btn-default { background: #2a2a3e; color: #aaa; }
+    body.dark-theme .btn-default:hover { background: #3a3a4e; }
+
+    .action-bar {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    /* ===== 开关 ===== */
+    .toggle-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .toggle-wrapper label {
+      font-size: 12px;
+      color: #666;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    body.dark-theme .toggle-wrapper label { color: #aaa; }
+
+    .toggle-switch {
+      position: relative;
+      width: 36px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: #d9d9d9;
+      border-radius: 20px;
+      transition: 0.3s;
+    }
+
+    .toggle-slider::before {
+      content: '';
+      position: absolute;
+      height: 16px;
+      width: 16px;
+      left: 2px;
+      bottom: 2px;
+      background: #fff;
+      border-radius: 50%;
+      transition: 0.3s;
+    }
+
+    .toggle-switch input:checked + .toggle-slider {
+      background: #1677ff;
+    }
+
+    .toggle-switch input:checked + .toggle-slider::before {
+      transform: translateX(16px);
+    }
+
+    /* ===== 历史记录 ===== */
+    .history-section {
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid #f0f0f0;
+    }
+
+    body.dark-theme .history-section { border-top-color: #333; }
+
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .history-header h3 {
+      font-size: 14px;
+      color: #555;
+      margin-bottom: 0;
+    }
+
+    body.dark-theme .history-header h3 { color: #aaa; }
+
+    .history-list {
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .history-item {
+      display: flex;
+      align-items: center;
+      padding: 8px 10px;
+      border-bottom: 1px solid #f5f5f5;
+      position: relative;
+      cursor: default;
+    }
+
+    body.dark-theme .history-item { border-bottom-color: #2a2a3e; }
+
+    .history-item:last-child { border-bottom: none; }
+
+    .history-title {
+      font-size: 13px;
+      color: #333;
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    body.dark-theme .history-title { color: #ccc; }
+
+    .history-detail {
+      font-size: 12px;
+      color: #999;
+      margin-left: 8px;
+      white-space: nowrap;
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .remove-history {
+      position: absolute;
+      right: 4px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #ff4d4f;
+      color: #fff;
+      border: none;
+      font-size: 11px;
+      cursor: pointer;
+      display: none;
+      line-height: 18px;
+      text-align: center;
+    }
+
+    .history-item:hover .remove-history { display: block; }
+
+    .history-empty {
+      font-size: 13px;
+      color: #ccc;
+      text-align: center;
+      padding: 10px;
+      display: block;
+    }
+
+    /* ===== Toast ===== */
+    .md-toast {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-20px);
+      padding: 10px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #fff;
+      z-index: 100000;
+      opacity: 0;
+      transition: all 0.3s ease;
+      pointer-events: none;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .md-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .md-toast.hide { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+    .md-toast-success { background: #52c41a; }
+    .md-toast-error { background: #ff4d4f; }
+    .md-toast-warning { background: #faad14; color: #333; }
+    .md-toast-info { background: #1677ff; }
+
+    /* ===== 响应式 ===== */
+    @media (max-width: 768px) {
+      .demo-title h1 { font-size: 24px; }
+      .card { padding: 16px; }
+      .editor-container { grid-template-columns: 1fr; }
+      .editor-pane, .preview-pane { min-height: auto; }
+      #editor { min-height: 300px; }
+      #previewContainer { min-height: 300px; }
+      .options-bar { flex-direction: column; align-items: stretch; }
+      .toolbar { overflow-x: auto; flex-wrap: nowrap; }
+    }
+
+    @media (max-width: 400px) {
+      body { padding: 12px; }
+      .card { padding: 12px; }
+      #editor { min-height: 250px; }
+      #previewContainer { min-height: 250px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="demo-title">
+      <h1>📝 Markdown 预览 & 编辑</h1>
+      <p>纯前端实现 · 实时预览 · 支持导出 HTML</p>
+    </div>
+
+    <!-- ===== 工具栏 ===== -->
+    <div class="card">
+      <h2>🔧 编辑工具</h2>
+      <div class="toolbar" id="toolbar">
+        <button class="toolbar-btn" id="boldBtn" title="加粗 (Ctrl+B)"><strong>B</strong></button>
+        <button class="toolbar-btn" id="italicBtn" title="斜体 (Ctrl+I)"><em>I</em></button>
+        <div class="toolbar-separator"></div>
+        <button class="toolbar-btn" id="headingBtn" title="标题">H</button>
+        <button class="toolbar-btn" id="linkBtn" title="链接">🔗</button>
+        <button class="toolbar-btn" id="imageBtn" title="图片">🖼</button>
+        <div class="toolbar-separator"></div>
+        <button class="toolbar-btn" id="codeBtn" title="行内代码"></></button>
+        <button class="toolbar-btn" id="listBtn" title="无序列表">•</button>
+        <button class="toolbar-btn" id="orderedListBtn" title="有序列表">1.</button>
+        <button class="toolbar-btn" id="quoteBtn" title="引用">❝</button>
+        <button class="toolbar-btn" id="tableBtn" title="表格">⊞</button>
+      </div>
+
+      <div class="options-bar">
+        <div class="form-group">
+          <label for="templateSelect">模板</label>
+          <select id="templateSelect">
+            <option value="">选择模板...</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="themeSelect">主题</label>
+          <select id="themeSelect"></select>
+        </div>
+        <div class="form-group">
+          <label for="fontSizeSelect">字号</label>
+          <select id="fontSizeSelect"></select>
+        </div>
+        <div class="toggle-wrapper">
+          <div class="toggle-switch">
+            <input type="checkbox" id="autoPreviewToggle" checked>
+            <span class="toggle-slider"></span>
+          </div>
+          <label for="autoPreviewToggle">自动预览</label>
+        </div>
+        <div class="action-bar">
+          <button class="btn btn-primary btn-small" id="previewBtn">👁 预览</button>
+          <button class="btn btn-success btn-small" id="exportHtmlBtn">📄 导出 HTML</button>
+          <button class="btn btn-default btn-small" id="clearBtn">🗑 清空</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 编辑器与预览 ===== -->
+    <div class="card">
+      <div class="editor-container">
+        <div class="editor-pane">
+          <div class="pane-header">
+            <label for="editor">✏️ 编辑器</label>
+            <span class="word-count" id="wordCount">0 字 | 0 词 | 1 行</span>
+          </div>
+          <textarea id="editor" placeholder="在此输入 Markdown 内容...&#10;&#10;支持语法:&#10;# 标题&#10;**加粗** *斜体*&#10;- 列表&#10;1. 有序列表&#10;> 引用&#10;`代码`&#10;```代码块```&#10;[链接](url)&#10;![图片](url)&#10;| 表格 |"></textarea>
+        </div>
+        <div class="preview-pane">
+          <div class="pane-header">
+            <label>👁 预览</label>
+          </div>
+          <div id="previewContainer">
+            <div id="preview"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 历史记录 ===== -->
+    <div class="card">
+      <div class="history-header">
+        <h3>📋 历史记录</h3>
+        <button class="btn btn-small btn-danger" id="clearHistoryBtn">🗑️ 清空</button>
+      </div>
+      <div class="history-list" id="historyList">
+        <span class="history-empty">暂无记录</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 引入模块（顺序重要） ===== -->
+  <script src="./config.js"></script>
+  <script src="./markdown-engine.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
