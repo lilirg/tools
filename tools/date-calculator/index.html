@@ -4,177 +4,20 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>📅 日期时间计算器</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../theme.css">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-      min-height: 100vh;
-      padding: 20px;
-    }
-
-    .container { max-width: 1000px; margin: 0 auto; }
-
-    .demo-title { text-align: center; margin-bottom: 30px; }
-    .demo-title h1 { font-size: 28px; color: #1a1a1a; margin-bottom: 8px; }
-    .demo-title p { color: #888; font-size: 14px; }
-
-    /* ===== Tab 切换 ===== */
-    .tab-bar {
-      display: flex;
-      gap: 0;
-      margin-bottom: 24px;
-      background: #fff;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-    }
-
-    .tab-btn {
-      flex: 1;
-      padding: 14px 10px;
-      border: none;
-      background: transparent;
-      font-size: 14px;
-      font-weight: 600;
-      color: #999;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-family: inherit;
-      position: relative;
-    }
-
-    .tab-btn:hover { color: #666; }
-    .tab-btn.active {
-      color: #1677ff;
-      background: rgba(22, 119, 255, 0.06);
-    }
-    .tab-btn.active::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 15%;
-      right: 15%;
-      height: 3px;
-      background: #1677ff;
-      border-radius: 3px 3px 0 0;
-    }
-
-    /* ===== Tab 内容 ===== */
-    .tab-content {
-      display: none;
-    }
-
-    .tab-content.active {
-      display: block;
-    }
-
-    /* ===== 卡片 ===== */
-    .card {
-      background: #fff;
-      border-radius: 12px;
-      padding: 24px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-      margin-bottom: 20px;
-    }
-
-    .card h2 {
-      font-size: 16px;
-      color: #333;
-      margin-bottom: 16px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid #f0f0f0;
-    }
-
-    .card h3 {
-      font-size: 14px;
-      color: #555;
-      margin-bottom: 12px;
-    }
-
-    /* ===== 表单 ===== */
-    .form-group {
-      margin-bottom: 14px;
-    }
-
-    .form-group label {
-      display: block;
-      font-size: 13px;
-      font-weight: 600;
-      color: #555;
-      margin-bottom: 6px;
-    }
-
-    .form-group input[type="date"],
-    .form-group input[type="datetime-local"],
-    .form-group input[type="text"],
-    .form-group input[type="number"],
-    .form-group select {
-      width: 100%;
-      padding: 10px 12px;
-      border: 1px solid #d9d9d9;
-      border-radius: 8px;
-      font-size: 14px;
-      transition: border-color 0.2s;
-      font-family: inherit;
-      background: #fff;
-    }
-
-    .form-group input:focus,
-    .form-group select:focus {
-      outline: none;
-      border-color: #1677ff;
-      box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.1);
-    }
-
-    .form-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-
-    .form-row-3 {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 12px;
-    }
-
-    /* ===== 按钮 ===== */
-    .btn {
-      padding: 10px 24px;
-      border: none;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-family: inherit;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .btn:hover { transform: translateY(-1px); }
-    .btn:active { transform: scale(0.98); }
-    .btn-primary { background: #1677ff; color: #fff; }
-    .btn-primary:hover { background: #4096ff; }
-    .btn-success { background: #52c41a; color: #fff; }
-    .btn-success:hover { background: #73d13d; }
-    .btn-default { background: #f0f0f0; color: #666; }
-    .btn-default:hover { background: #e0e0e0; }
-    .btn-block { width: 100%; justify-content: center; }
-
-    /* ===== 结果展示 ===== */
+    /* ===== Tool-specific styles ===== */
     .result-box {
       display: none;
       margin-top: 16px;
       padding: 16px;
-      background: #f6ffed;
-      border: 1px solid #b7eb8f;
-      border-radius: 8px;
+      background: rgba(0,184,148,0.08);
+      border: 1px solid rgba(0,184,148,0.2);
+      border-radius: var(--radius-sm);
     }
-
     .result-box.show { display: block; }
 
     .result-grid {
@@ -186,21 +29,21 @@
     .result-item {
       text-align: center;
       padding: 10px;
-      background: #fff;
-      border-radius: 8px;
-      border: 1px solid #e8e8e8;
+      background: var(--bg-input);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
     }
 
     .result-item .value {
       font-size: 24px;
       font-weight: 700;
-      color: #1677ff;
+      color: var(--accent-2);
       display: block;
     }
 
     .result-item .label {
       font-size: 12px;
-      color: #999;
+      color: var(--text-tertiary);
       margin-top: 4px;
       display: block;
     }
@@ -208,38 +51,36 @@
     .result-text {
       font-size: 18px;
       font-weight: 600;
-      color: #333;
+      color: var(--text-primary);
       text-align: center;
       padding: 12px;
     }
 
-    /* ===== 时间戳格式展示 ===== */
     .format-item {
       display: flex;
       justify-content: space-between;
       align-items: center;
       padding: 8px 12px;
-      border-bottom: 1px solid #f0f0f0;
+      border-bottom: 1px solid var(--border-subtle);
     }
 
     .format-item:last-child { border-bottom: none; }
 
     .format-label {
       font-size: 13px;
-      color: #888;
+      color: var(--text-tertiary);
       font-weight: 600;
       min-width: 140px;
     }
 
     .format-value {
       font-size: 14px;
-      color: #333;
-      font-family: 'Courier New', monospace;
+      color: var(--text-primary);
+      font-family: var(--font-mono);
       word-break: break-all;
       text-align: right;
     }
 
-    /* ===== 时区转换结果 ===== */
     .tz-comparison {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -248,32 +89,32 @@
 
     .tz-box {
       padding: 14px;
-      border-radius: 8px;
+      border-radius: var(--radius-sm);
       text-align: center;
     }
 
-    .tz-box.source { background: #e6f7ff; border: 1px solid #91d5ff; }
-    .tz-box.target { background: #f6ffed; border: 1px solid #b7eb8f; }
+    .tz-box.source { background: rgba(108,92,231,0.1); border: 1px solid rgba(108,92,231,0.2); }
+    .tz-box.target { background: rgba(0,184,148,0.1); border: 1px solid rgba(0,184,148,0.2); }
 
-    .tz-box .tz-label { font-size: 12px; color: #888; margin-bottom: 6px; }
-    .tz-box .tz-time { font-size: 16px; font-weight: 600; color: #333; }
+    .tz-box .tz-label { font-size: 12px; color: var(--text-tertiary); margin-bottom: 6px; }
+    .tz-box .tz-time { font-size: 16px; font-weight: 600; color: var(--text-primary); }
+
     .tz-offset {
       grid-column: 1 / -1;
       text-align: center;
       padding: 8px;
-      background: #fffbe6;
-      border: 1px solid #ffe58f;
-      border-radius: 8px;
+      background: rgba(253,203,110,0.1);
+      border: 1px solid rgba(253,203,110,0.3);
+      border-radius: var(--radius-sm);
       font-size: 14px;
-      color: #d48806;
+      color: var(--accent-5);
     }
 
-    /* ===== 节假日列表 ===== */
     .holiday-item {
       display: flex;
       align-items: center;
       padding: 10px 12px;
-      border-bottom: 1px solid #f0f0f0;
+      border-bottom: 1px solid var(--border-subtle);
       gap: 12px;
     }
 
@@ -282,31 +123,31 @@
     .holiday-name {
       font-size: 15px;
       font-weight: 600;
-      color: #333;
+      color: var(--text-primary);
       min-width: 80px;
     }
 
     .holiday-date {
       font-size: 13px;
-      color: #666;
+      color: var(--text-secondary);
       flex: 1;
     }
 
     .holiday-days {
       font-size: 13px;
-      color: #1677ff;
+      color: var(--accent-2);
       font-weight: 600;
     }
 
     .workday-section {
       margin-top: 12px;
       padding-top: 12px;
-      border-top: 1px solid #f0f0f0;
+      border-top: 1px solid var(--border-subtle);
     }
 
     .workday-section h4 {
       font-size: 14px;
-      color: #d48806;
+      color: var(--accent-5);
       margin-bottom: 8px;
     }
 
@@ -314,29 +155,29 @@
       display: inline-block;
       padding: 4px 10px;
       margin: 3px;
-      background: #fffbe6;
-      border: 1px solid #ffe58f;
+      background: rgba(253,203,110,0.1);
+      border: 1px solid rgba(253,203,110,0.3);
       border-radius: 4px;
       font-size: 12px;
-      color: #d48806;
+      color: var(--accent-5);
     }
 
     .check-result {
       text-align: center;
       padding: 16px;
-      border-radius: 8px;
+      border-radius: var(--radius-sm);
       font-size: 18px;
       font-weight: 600;
     }
 
-    .check-result.workday { background: #e6f7ff; border: 1px solid #91d5ff; color: #1677ff; }
-    .check-result.holiday { background: #fff1f0; border: 1px solid #ffa39e; color: #ff4d4f; }
+    .check-result.workday { background: rgba(108,92,231,0.1); border: 1px solid rgba(108,92,231,0.2); color: var(--accent-2); }
+    .check-result.holiday { background: rgba(214,48,49,0.1); border: 1px solid rgba(214,48,49,0.3); color: var(--accent-3); }
 
     .next-holiday-card {
       text-align: center;
       padding: 20px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      border-radius: 12px;
+      background: linear-gradient(135deg, var(--accent-1), var(--accent-3));
+      border-radius: var(--radius-md);
       color: #fff;
     }
 
@@ -348,136 +189,33 @@
     .empty-hint {
       text-align: center;
       padding: 20px;
-      color: #ccc;
+      color: var(--text-muted);
       font-size: 14px;
     }
 
-    /* ===== 历史记录 ===== */
-    .history-section {
-      margin-top: 20px;
-      padding-top: 16px;
-      border-top: 1px solid #f0f0f0;
-    }
-
-    .history-section h3 {
-      font-size: 14px;
-      color: #555;
-      margin-bottom: 10px;
-    }
-
-    .history-list {
-      max-height: 200px;
-      overflow-y: auto;
-    }
-
-    .history-item {
-      display: flex;
-      align-items: center;
-      padding: 8px 10px;
-      border-bottom: 1px solid #f5f5f5;
-      position: relative;
-      cursor: default;
-    }
-
-    .history-item:last-child { border-bottom: none; }
-
-    .history-title {
-      font-size: 13px;
-      color: #333;
-      flex: 1;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .history-detail {
-      font-size: 12px;
-      color: #999;
-      margin-left: 8px;
-      white-space: nowrap;
-    }
-
-    .remove-history {
-      position: absolute;
-      right: 4px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      background: #ff4d4f;
-      color: #fff;
-      border: none;
-      font-size: 11px;
-      cursor: pointer;
-      display: none;
-      line-height: 18px;
-      text-align: center;
-    }
-
-    .history-item:hover .remove-history { display: block; }
-
-    .history-empty {
-      font-size: 13px;
-      color: #ccc;
-      text-align: center;
-      padding: 10px;
-      display: block;
-    }
-
-    /* ===== Toast ===== */
-    .dc-toast {
-      position: fixed;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%) translateY(-20px);
-      padding: 10px 24px;
-      border-radius: 8px;
-      font-size: 14px;
-      color: #fff;
-      z-index: 100000;
-      opacity: 0;
-      transition: all 0.3s ease;
-      pointer-events: none;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    }
-
-    .dc-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-    .dc-toast.hide { opacity: 0; transform: translateX(-50%) translateY(-20px); }
-    .dc-toast-success { background: #52c41a; }
-    .dc-toast-error { background: #ff4d4f; }
-    .dc-toast-warning { background: #faad14; color: #333; }
-    .dc-toast-info { background: #1677ff; }
-
-    /* ===== 响应式 ===== */
     @media (max-width: 768px) {
-      .demo-title h1 { font-size: 24px; }
-      .card { padding: 16px; }
-      .form-row { grid-template-columns: 1fr; }
-      .form-row-3 { grid-template-columns: 1fr; }
       .result-grid { grid-template-columns: repeat(2, 1fr); }
       .tz-comparison { grid-template-columns: 1fr; }
-      .tab-btn { font-size: 12px; padding: 12px 6px; }
       .format-item { flex-direction: column; align-items: flex-start; gap: 4px; }
       .format-label { min-width: auto; }
       .format-value { text-align: left; }
     }
 
     @media (max-width: 400px) {
-      body { padding: 12px; }
-      .card { padding: 12px; }
       .result-grid { grid-template-columns: 1fr 1fr; }
     }
   </style>
 </head>
 <body>
   <div class="container">
+    <div class="back-bar">
+      <a class="back-btn" href="../index.html">← 返回首页</a>
+    </div>
     <div class="demo-title">
       <h1>📅 日期时间计算器</h1>
       <p>日期差 · 日期加减 · 工作日 · 年龄 · 时间戳 · 时区 · 节假日</p>
     </div>
 
-    <!-- ===== Tab 栏 ===== -->
     <div class="tab-bar">
       <button class="tab-btn active" data-tab="0">📅 日期计算</button>
       <button class="tab-btn" data-tab="1">⏰ 时间戳转换</button>
@@ -485,11 +223,8 @@
       <button class="tab-btn" data-tab="3">🎉 节假日查询</button>
     </div>
 
-    <!-- ============================================ -->
     <!-- Tab 1: 日期计算 -->
-    <!-- ============================================ -->
     <div class="tab-content active" id="tab0">
-      <!-- 日期差计算 -->
       <div class="card">
         <h2>📊 日期差计算</h2>
         <div class="form-row">
@@ -506,45 +241,24 @@
 
         <div class="result-box" id="diffResult">
           <div class="result-grid">
-            <div class="result-item">
-              <span class="value" id="diffYears">0</span>
-              <span class="label">年</span>
-            </div>
-            <div class="result-item">
-              <span class="value" id="diffMonths">0</span>
-              <span class="label">月</span>
-            </div>
-            <div class="result-item">
-              <span class="value" id="diffDays">0</span>
-              <span class="label">日</span>
-            </div>
-            <div class="result-item">
-              <span class="value" id="diffHours">0</span>
-              <span class="label">时</span>
-            </div>
-            <div class="result-item">
-              <span class="value" id="diffMinutes">0</span>
-              <span class="label">分</span>
-            </div>
-            <div class="result-item">
-              <span class="value" id="diffSeconds">0</span>
-              <span class="label">秒</span>
-            </div>
+            <div class="result-item"><span class="value" id="diffYears">0</span><span class="label">年</span></div>
+            <div class="result-item"><span class="value" id="diffMonths">0</span><span class="label">月</span></div>
+            <div class="result-item"><span class="value" id="diffDays">0</span><span class="label">日</span></div>
+            <div class="result-item"><span class="value" id="diffHours">0</span><span class="label">时</span></div>
+            <div class="result-item"><span class="value" id="diffMinutes">0</span><span class="label">分</span></div>
+            <div class="result-item"><span class="value" id="diffSeconds">0</span><span class="label">秒</span></div>
           </div>
-          <div style="margin-top:12px;padding-top:12px;border-top:1px solid #e8e8e8;">
+          <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border-subtle);">
             <div class="result-item" style="display:inline-block;margin-right:10px;">
-              <span class="value" id="diffTotalDays">0</span>
-              <span class="label">总天数</span>
+              <span class="value" id="diffTotalDays">0</span><span class="label">总天数</span>
             </div>
             <div class="result-item" style="display:inline-block;">
-              <span class="value" id="diffTotalHours">0</span>
-              <span class="label">总小时数</span>
+              <span class="value" id="diffTotalHours">0</span><span class="label">总小时数</span>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- 日期加减 -->
       <div class="card">
         <h2>➕ 日期加减</h2>
         <div class="form-row-3">
@@ -574,13 +288,11 @@
           </select>
         </div>
         <button class="btn btn-primary btn-block" id="calcAddBtn">➕ 计算</button>
-
         <div class="result-box" id="addResult">
           <div class="result-text" id="addResultText"></div>
         </div>
       </div>
 
-      <!-- 工作日计算 -->
       <div class="card">
         <h2>💼 工作日计算</h2>
         <div class="form-row">
@@ -594,13 +306,11 @@
           </div>
         </div>
         <button class="btn btn-primary btn-block" id="calcBizBtn">💼 计算工作日</button>
-
         <div class="result-box" id="bizResult">
-          <div class="result-text">工作日天数：<strong id="bizDays" style="font-size:32px;color:#1677ff;">0</strong> 天</div>
+          <div class="result-text">工作日天数：<strong id="bizDays" style="font-size:32px;color:var(--accent-2);">0</strong> 天</div>
         </div>
       </div>
 
-      <!-- 年龄计算 -->
       <div class="card">
         <h2>🎂 年龄计算</h2>
         <div class="form-group">
@@ -608,42 +318,26 @@
           <input type="date" id="birthDate">
         </div>
         <button class="btn btn-primary btn-block" id="calcAgeBtn">🎂 计算年龄</button>
-
         <div class="result-box" id="ageResult">
           <div class="result-grid">
-            <div class="result-item">
-              <span class="value" id="ageYears">0</span>
-              <span class="label">岁</span>
-            </div>
-            <div class="result-item">
-              <span class="value" id="ageMonths">0</span>
-              <span class="label">月</span>
-            </div>
-            <div class="result-item">
-              <span class="value" id="ageDays">0</span>
-              <span class="label">天</span>
-            </div>
-            <div class="result-item">
-              <span class="value" id="ageTotalDays">0</span>
-              <span class="label">总天数</span>
-            </div>
+            <div class="result-item"><span class="value" id="ageYears">0</span><span class="label">岁</span></div>
+            <div class="result-item"><span class="value" id="ageMonths">0</span><span class="label">月</span></div>
+            <div class="result-item"><span class="value" id="ageDays">0</span><span class="label">天</span></div>
+            <div class="result-item"><span class="value" id="ageTotalDays">0</span><span class="label">总天数</span></div>
           </div>
-          <div style="margin-top:12px;padding:10px;background:#fff;border-radius:8px;border:1px solid #e8e8e8;text-align:center;">
-            <span style="font-size:13px;color:#888;">下一个生日：</span>
-            <span id="ageNextBirthday" style="font-weight:600;color:#333;"></span>
-            <span style="font-size:13px;color:#888;margin-left:12px;">还有</span>
-            <span id="ageDaysToNext" style="font-weight:700;color:#1677ff;font-size:18px;">0</span>
-            <span style="font-size:13px;color:#888;">天</span>
+          <div style="margin-top:12px;padding:10px;background:var(--bg-input);border-radius:var(--radius-sm);border:1px solid var(--border-subtle);text-align:center;">
+            <span style="font-size:13px;color:var(--text-tertiary);">下一个生日：</span>
+            <span id="ageNextBirthday" style="font-weight:600;color:var(--text-primary);"></span>
+            <span style="font-size:13px;color:var(--text-tertiary);margin-left:12px;">还有</span>
+            <span id="ageDaysToNext" style="font-weight:700;color:var(--accent-2);font-size:18px;">0</span>
+            <span style="font-size:13px;color:var(--text-tertiary);">天</span>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- ============================================ -->
     <!-- Tab 2: 时间戳转换 -->
-    <!-- ============================================ -->
     <div class="tab-content" id="tab1">
-      <!-- 时间戳 → 日期 -->
       <div class="card">
         <h2>⏰ 时间戳 → 日期</h2>
         <div class="form-row">
@@ -660,13 +354,11 @@
           </div>
         </div>
         <button class="btn btn-primary btn-block" id="convertTsBtn">⏰ 转换为日期</button>
-
         <div class="result-box" id="tsResult">
           <div id="tsFormats"></div>
         </div>
       </div>
 
-      <!-- 日期 → 时间戳 -->
       <div class="card">
         <h2>⏱️ 日期 → 时间戳</h2>
         <div class="form-group">
@@ -674,7 +366,6 @@
           <input type="datetime-local" id="dateToTsInput">
         </div>
         <button class="btn btn-primary btn-block" id="convertDateBtn">⏱️ 转换为时间戳</button>
-
         <div class="result-box" id="dateTsResult">
           <div class="result-grid">
             <div class="result-item">
@@ -690,9 +381,7 @@
       </div>
     </div>
 
-    <!-- ============================================ -->
     <!-- Tab 3: 时区转换 -->
-    <!-- ============================================ -->
     <div class="tab-content" id="tab2">
       <div class="card">
         <h2>🌍 时区转换</h2>
@@ -711,7 +400,6 @@
           <input type="datetime-local" id="tzDateTime">
         </div>
         <button class="btn btn-primary btn-block" id="convertTzBtn">🌍 转换时区</button>
-
         <div class="result-box" id="tzResult">
           <div class="tz-comparison">
             <div class="tz-box source">
@@ -728,11 +416,8 @@
       </div>
     </div>
 
-    <!-- ============================================ -->
     <!-- Tab 4: 节假日查询 -->
-    <!-- ============================================ -->
     <div class="tab-content" id="tab3">
-      <!-- 年份节假日列表 -->
       <div class="card">
         <h2>📋 节假日列表</h2>
         <div class="form-group">
@@ -744,7 +429,6 @@
         </div>
       </div>
 
-      <!-- 日期判断 -->
       <div class="card">
         <h2>🔍 日期判断</h2>
         <div class="form-group">
@@ -755,7 +439,6 @@
         <div id="holidayCheckResult" style="margin-top:12px;"></div>
       </div>
 
-      <!-- 下一个节假日 -->
       <div class="card">
         <h2>🎯 下一个节假日</h2>
         <button class="btn btn-primary btn-block" id="nextHolidayBtn">🎯 查询下一个节假日</button>
@@ -763,7 +446,7 @@
       </div>
     </div>
 
-    <!-- ===== 历史记录 ===== -->
+    <!-- 历史记录 -->
     <div class="card">
       <h2>📋 历史记录</h2>
       <div class="history-list" id="historyList">
@@ -772,7 +455,6 @@
     </div>
   </div>
 
-  <!-- ===== 引入模块（顺序重要） ===== -->
   <script src="./node_modules/dayjs/dayjs.min.js"></script>
   <script src="./node_modules/dayjs/plugin/utc.js"></script>
   <script src="./node_modules/dayjs/plugin/timezone.js"></script>
@@ -783,7 +465,6 @@
   <script src="./node_modules/dayjs/plugin/duration.js"></script>
   <script src="./node_modules/dayjs/plugin/relativeTime.js"></script>
   <script>
-    // 初始化 dayjs 插件
     dayjs.extend(dayjs_plugin_utc)
     dayjs.extend(dayjs_plugin_timezone)
     dayjs.extend(dayjs_plugin_customParseFormat)

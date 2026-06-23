@@ -4,642 +4,326 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>🌐 IP / 网络信息查询</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../theme.css">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-      min-height: 100vh;
-      padding: 20px;
-    }
-
-    .container { max-width: 1000px; margin: 0 auto; }
-
-    .demo-title { text-align: center; margin-bottom: 30px; }
-    .demo-title h1 { font-size: 28px; color: #1a1a1a; margin-bottom: 8px; }
-    .demo-title p { color: #888; font-size: 14px; }
-
-    /* ===== 卡片 ===== */
-    .card {
-      background: #fff;
-      border-radius: 12px;
-      padding: 24px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-      margin-bottom: 20px;
-    }
-
-    .card h2 {
-      font-size: 16px;
-      color: #333;
-      margin-bottom: 16px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid #f0f0f0;
-    }
-
-    .card h3 {
-      font-size: 14px;
-      color: #555;
-      margin-bottom: 12px;
-    }
-
-    /* ===== Tab 导航 ===== */
+    /* ===== Tool-specific styles ===== */
     .ip-tabs {
       display: flex;
       gap: 4px;
       margin-bottom: 20px;
-      background: #f5f5f5;
-      border-radius: 10px;
+      background: var(--bg-tab-hover);
       padding: 4px;
+      border-radius: var(--radius-sm);
     }
 
-    .ip-tab {
+    .ip-tab-btn {
       flex: 1;
       padding: 10px 16px;
       border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
       background: transparent;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 500;
-      color: #666;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-family: inherit;
-      text-align: center;
+      color: var(--text-tertiary);
+      transition: var(--transition);
+      font-family: var(--font-body);
     }
 
-    .ip-tab:hover { color: #333; }
-    .ip-tab.active {
-      background: #fff;
-      color: #1677ff;
-      font-weight: 600;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    .ip-tab-btn:hover { color: var(--text-primary); }
+    .ip-tab-btn.active {
+      background: var(--bg-card);
+      color: var(--text-primary);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
 
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
+    .ip-tab-content { display: none; }
+    .ip-tab-content.active { display: block; }
 
-    /* ===== 表单 ===== */
-    .form-group {
-      margin-bottom: 14px;
-    }
-
-    .form-group label {
-      display: block;
-      font-size: 13px;
-      font-weight: 600;
-      color: #555;
-      margin-bottom: 6px;
-    }
-
-    .form-group input[type="text"],
-    .form-group input[type="number"] {
-      width: 100%;
-      padding: 10px 12px;
-      border: 1px solid #d9d9d9;
-      border-radius: 8px;
-      font-size: 14px;
-      transition: border-color 0.2s;
-      font-family: inherit;
-      background: #fff;
-    }
-
-    .form-group input:focus {
-      outline: none;
-      border-color: #1677ff;
-      box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.1);
-    }
-
-    .form-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-
-    /* ===== 按钮 ===== */
-    .btn {
-      padding: 10px 24px;
-      border: none;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-family: inherit;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .btn:hover { transform: translateY(-1px); }
-    .btn:active { transform: scale(0.98); }
-    .btn-primary { background: #1677ff; color: #fff; }
-    .btn-primary:hover { background: #4096ff; }
-    .btn-default { background: #f0f0f0; color: #666; }
-    .btn-default:hover { background: #e0e0e0; }
-    .btn-small { padding: 6px 12px; font-size: 12px; }
-    .btn-danger { background: #ff4d4f; color: #fff; }
-    .btn-danger:hover { background: #ff7875; }
-
-    .action-bar {
+    .ip-input-row {
       display: flex;
       gap: 8px;
-      align-items: center;
-      margin-top: 12px;
+      margin-bottom: 16px;
     }
 
-    /* ===== 结果卡片 ===== */
-    .result-card {
-      background: #fafafa;
-      border: 1px solid #e8e8e8;
-      border-radius: 10px;
+    .ip-input-row input {
+      flex: 1;
+      padding: 10px 14px;
+      border: 2px solid var(--border-input);
+      border-radius: var(--radius-sm);
+      font-size: 15px;
+      font-family: var(--font-mono);
+      background: var(--bg-input);
+      color: var(--text-primary);
+      transition: var(--transition);
+    }
+
+    .ip-input-row input:focus {
+      outline: none;
+      border-color: var(--accent-1);
+      box-shadow: 0 0 0 2px rgba(108,92,231,0.15);
+    }
+
+    .ip-result-card {
+      background: var(--bg-input);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
       padding: 16px;
-      margin-top: 12px;
+      margin-bottom: 12px;
     }
 
-    .result-row {
+    .ip-result-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
       padding: 6px 0;
-      border-bottom: 1px solid #f0f0f0;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .ip-result-row:last-child { border-bottom: none; }
+
+    .ip-result-label {
+      font-size: 13px;
+      color: var(--text-tertiary);
+      font-weight: 500;
     }
 
-    .result-row:last-child { border-bottom: none; }
-
-    .result-label {
-      font-size: 13px;
-      color: #999;
-      flex-shrink: 0;
-      margin-right: 12px;
-    }
-
-    .result-value {
-      font-size: 13px;
-      color: #333;
+    .ip-result-value {
+      font-size: 14px;
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-weight: 600;
       text-align: right;
       word-break: break-all;
     }
 
-    .result-value.mono {
-      font-family: 'SF Mono', 'Consolas', monospace;
-      font-size: 12px;
-    }
+    .ip-result-value.valid { color: var(--accent-8); }
+    .ip-result-value.invalid { color: var(--accent-3); }
 
-    .result-value.ip-highlight {
-      font-size: 18px;
-      font-weight: 700;
-      color: #1677ff;
-    }
-
-    .result-error {
-      padding: 12px;
-      color: #ff4d4f;
-      background: #fff2f0;
-      border: 1px solid #ffccc7;
-      border-radius: 8px;
-      font-size: 14px;
-      margin-top: 12px;
-    }
-
-    /* ===== 子网列表 ===== */
-    .subnet-list {
-      margin-top: 16px;
-    }
-
-    .subnet-list h4 {
-      font-size: 14px;
-      color: #555;
-      margin-bottom: 10px;
-    }
-
-    .subnet-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 8px 12px;
-      background: #fafafa;
-      border: 1px solid #f0f0f0;
-      border-radius: 8px;
-      margin-bottom: 6px;
-    }
-
-    .subnet-index {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      background: #1677ff;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      font-weight: 700;
-      flex-shrink: 0;
-    }
-
-    .subnet-info {
-      flex: 1;
-    }
-
-    .subnet-cidr {
-      font-size: 14px;
-      font-weight: 600;
-      color: #333;
-    }
-
-    .subnet-range {
-      font-size: 12px;
-      color: #999;
-      margin-top: 2px;
-    }
-
-    .subnet-hosts {
-      font-size: 12px;
-      color: #1677ff;
-      font-weight: 600;
-    }
-
-    /* ===== 本机信息 ===== */
-    .info-grid {
+    .ip-cidr-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 12px;
     }
 
-    .info-item {
-      background: #fafafa;
-      border: 1px solid #f0f0f0;
-      border-radius: 10px;
-      padding: 16px;
+    .ip-cidr-item {
+      padding: 10px 12px;
+      background: var(--bg-input);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
     }
 
-    .info-item .info-label {
+    .ip-cidr-label {
       font-size: 12px;
-      color: #999;
-      margin-bottom: 6px;
+      color: var(--text-tertiary);
+      margin-bottom: 4px;
     }
 
-    .info-item .info-value {
+    .ip-cidr-value {
       font-size: 14px;
-      color: #333;
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-weight: 600;
+    }
+
+    .ip-subnet-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+    }
+
+    .ip-subnet-table th,
+    .ip-subnet-table td {
+      padding: 8px 10px;
+      border: 1px solid var(--border-subtle);
+      font-size: 13px;
+      text-align: left;
+    }
+
+    .ip-subnet-table th {
+      background: var(--bg-tab-hover);
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .ip-subnet-table td {
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+      font-size: 12px;
+    }
+
+    .ip-subnet-table tr:hover td {
+      background: var(--bg-tab-hover);
+    }
+
+    .ip-local-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .ip-local-item {
+      padding: 14px 16px;
+      background: var(--bg-input);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+    }
+
+    .ip-local-label {
+      font-size: 12px;
+      color: var(--text-tertiary);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .ip-local-value {
+      font-size: 15px;
+      color: var(--text-primary);
+      font-family: var(--font-mono);
       font-weight: 600;
       word-break: break-all;
     }
 
-    .status-online { color: #52c41a; }
-    .status-offline { color: #ff4d4f; }
-
-    /* ===== 参考表格 ===== */
-    .ref-table {
+    .ip-ref-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 13px;
-      margin-top: 8px;
     }
 
-    .ref-table th,
-    .ref-table td {
+    .ip-ref-table th,
+    .ip-ref-table td {
       padding: 8px 10px;
-      border: 1px solid #e8e8e8;
+      border: 1px solid var(--border-subtle);
+      font-size: 13px;
       text-align: left;
     }
 
-    .ref-table th {
-      background: #f6f8fa;
+    .ip-ref-table th {
+      background: var(--bg-tab-hover);
       font-weight: 600;
-      color: #555;
+      color: var(--text-primary);
+    }
+
+    .ip-ref-table td {
+      color: var(--text-secondary);
+    }
+
+    .ip-ref-table tr:hover td {
+      background: var(--bg-tab-hover);
+    }
+
+    .ip-ref-code {
+      font-family: var(--font-mono);
+      color: var(--accent-2);
       font-size: 12px;
     }
 
-    .ref-table td {
-      color: #666;
-    }
-
-    .ref-table tr:hover td {
-      background: #fafafa;
-    }
-
-    .ref-section {
-      margin-bottom: 20px;
-    }
-
-    .ref-section:last-child { margin-bottom: 0; }
-
-    .ref-section h4 {
-      font-size: 14px;
-      color: #555;
-      margin-bottom: 8px;
-    }
-
-    /* ===== 历史记录 ===== */
-    .history-section {
-      margin-top: 20px;
-      padding-top: 16px;
-      border-top: 1px solid #f0f0f0;
-    }
-
-    .history-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-    }
-
-    .history-header h3 {
-      font-size: 14px;
-      color: #555;
-      margin-bottom: 0;
-    }
-
-    .history-list {
-      max-height: 200px;
-      overflow-y: auto;
-    }
-
-    .history-item {
-      display: flex;
-      align-items: center;
-      padding: 8px 10px;
-      border-bottom: 1px solid #f5f5f5;
-      position: relative;
-      cursor: default;
-    }
-
-    .history-item:last-child { border-bottom: none; }
-
-    .history-title {
+    .ip-error {
+      padding: 10px 14px;
+      background: rgba(214,48,49,0.1);
+      border: 1px solid rgba(214,48,49,0.3);
+      border-radius: 6px;
+      color: var(--accent-3);
       font-size: 13px;
-      color: #333;
-      flex: 1;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      margin-bottom: 12px;
     }
 
-    .history-detail {
-      font-size: 12px;
-      color: #999;
-      margin-left: 8px;
-      white-space: nowrap;
-      max-width: 200px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .remove-history {
-      position: absolute;
-      right: 4px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      background: #ff4d4f;
-      color: #fff;
-      border: none;
-      font-size: 11px;
-      cursor: pointer;
-      display: none;
-      line-height: 18px;
-      text-align: center;
-    }
-
-    .history-item:hover .remove-history { display: block; }
-
-    .history-empty {
-      font-size: 13px;
-      color: #ccc;
-      text-align: center;
-      padding: 10px;
-      display: block;
-    }
-
-    /* ===== Toast ===== */
-    .ip-toast {
-      position: fixed;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%) translateY(-20px);
-      padding: 10px 24px;
-      border-radius: 8px;
-      font-size: 14px;
-      color: #fff;
-      z-index: 100000;
-      opacity: 0;
-      transition: all 0.3s ease;
-      pointer-events: none;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    }
-
-    .ip-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-    .ip-toast.hide { opacity: 0; transform: translateX(-50%) translateY(-20px); }
-    .ip-toast-success { background: #52c41a; }
-    .ip-toast-error { background: #ff4d4f; }
-    .ip-toast-warning { background: #faad14; color: #333; }
-    .ip-toast-info { background: #1677ff; }
-
-    /* ===== 响应式 ===== */
     @media (max-width: 768px) {
-      .demo-title h1 { font-size: 24px; }
-      .card { padding: 16px; }
-      .ip-tab { font-size: 12px; padding: 8px 10px; }
-      .form-row { grid-template-columns: 1fr; }
-      .info-grid { grid-template-columns: 1fr; }
-      .result-row { flex-direction: column; align-items: flex-start; gap: 4px; }
-      .result-value { text-align: left; width: 100%; }
-      .ref-table { font-size: 12px; }
-      .ref-table th, .ref-table td { padding: 6px 8px; }
-    }
-
-    @media (max-width: 400px) {
-      body { padding: 12px; }
-      .card { padding: 12px; }
-      .ip-tab { font-size: 11px; padding: 6px 8px; }
+      .ip-cidr-grid { grid-template-columns: 1fr; }
+      .ip-local-grid { grid-template-columns: 1fr; }
+      .ip-input-row { flex-direction: column; }
+      .ip-input-row input { width: 100%; }
+      .ip-subnet-table { font-size: 12px; }
+      .ip-subnet-table th,
+      .ip-subnet-table td { padding: 6px 8px; }
     }
   </style>
 </head>
 <body>
   <div class="container">
+    <div class="back-bar">
+      <a class="back-btn" href="../index.html">← 返回首页</a>
+    </div>
     <div class="demo-title">
       <h1>🌐 IP / 网络信息查询</h1>
-      <p>纯前端实现 · IP 查询 · CIDR 计算 · 子网划分 · 本机信息</p>
+      <p>纯前端实现 · IP 查询 · CIDR 计算 · 子网划分 · 参考速查</p>
     </div>
 
-    <!-- ===== Tab 导航 ===== -->
     <div class="ip-tabs">
-      <button class="ip-tab active" data-tab="query">🔍 IP 查询</button>
-      <button class="ip-tab" data-tab="cidr">📐 CIDR 计算</button>
-      <button class="ip-tab" data-tab="subnet">🔀 子网划分</button>
-      <button class="ip-tab" data-tab="local">💻 本机信息</button>
-      <button class="ip-tab" data-tab="reference">📖 参考</button>
+      <button class="ip-tab-btn active">🔍 IP 查询</button>
+      <button class="ip-tab-btn">📐 CIDR 计算</button>
+      <button class="ip-tab-btn">💻 本机信息</button>
+      <button class="ip-tab-btn">📖 速查表</button>
     </div>
 
-    <!-- ===== Tab: IP 查询 ===== -->
-    <div class="card tab-content active" id="tab-query">
-      <h2>🔍 IP 地址查询</h2>
-      <div class="form-group">
-        <label for="ipInput">输入 IP 地址 (支持 IPv4 / IPv6)</label>
-        <input type="text" id="ipInput" placeholder="例如: 192.168.1.1 或 2001:db8::1">
+    <!-- Tab 1: IP 查询 -->
+    <div class="ip-tab-content active">
+      <div class="card">
+        <h2>🔍 IP 地址查询与验证</h2>
+        <div class="ip-input-row">
+          <input type="text" id="ipInput" placeholder="输入 IP 地址，如 192.168.1.1" spellcheck="false">
+          <button class="btn btn-primary" id="ipQueryBtn">🔍 查询</button>
+        </div>
+        <div id="ipResult"></div>
       </div>
-      <button class="btn btn-primary" id="ipLookupBtn">🔍 查询</button>
-      <div id="ipResult"></div>
     </div>
 
-    <!-- ===== Tab: CIDR 计算 ===== -->
-    <div class="card tab-content" id="tab-cidr">
-      <h2>📐 CIDR 计算</h2>
-      <div class="form-group">
-        <label for="cidrInput">输入 CIDR 地址</label>
-        <input type="text" id="cidrInput" placeholder="例如: 192.168.1.0/24">
+    <!-- Tab 2: CIDR 计算 -->
+    <div class="ip-tab-content">
+      <div class="card">
+        <h2>📐 CIDR 计算 / 子网划分</h2>
+        <div class="ip-input-row">
+          <input type="text" id="cidrInput" placeholder="输入 CIDR，如 192.168.1.0/24" spellcheck="false">
+          <button class="btn btn-primary" id="cidrCalcBtn">📐 计算</button>
+        </div>
+        <div id="cidrResult"></div>
       </div>
-      <button class="btn btn-primary" id="cidrCalcBtn">📐 计算</button>
-      <div id="cidrResult"></div>
     </div>
 
-    <!-- ===== Tab: 子网划分 ===== -->
-    <div class="card tab-content" id="tab-subnet">
-      <h2>🔀 子网划分</h2>
-      <div class="form-row">
-        <div class="form-group">
-          <label for="subnetCidrInput">网络 CIDR</label>
-          <input type="text" id="subnetCidrInput" placeholder="例如: 192.168.1.0/24">
-        </div>
-        <div class="form-group">
-          <label for="subnetPrefixInput">新前缀长度</label>
-          <input type="number" id="subnetPrefixInput" placeholder="例如: 26" min="1" max="32">
-        </div>
-      </div>
-      <button class="btn btn-primary" id="subnetCalcBtn">🔀 划分子网</button>
-      <div id="subnetResult"></div>
-    </div>
-
-    <!-- ===== Tab: 本机信息 ===== -->
-    <div class="card tab-content" id="tab-local">
-      <h2>💻 本机网络信息</h2>
-      <div class="info-grid">
-        <div class="info-item">
-          <div class="info-label">本机 IP 地址</div>
-          <div class="info-value" id="localIP">获取中...</div>
-        </div>
-        <div class="info-item">
-          <div class="info-label">网络状态</div>
-          <div class="info-value" id="networkStatus">检测中...</div>
-        </div>
-        <div class="info-item">
-          <div class="info-label">连接类型</div>
-          <div class="info-value" id="connectionType">检测中...</div>
-        </div>
-        <div class="info-item">
-          <div class="info-label">下行速度</div>
-          <div class="info-value" id="downlink">检测中...</div>
-        </div>
-        <div class="info-item">
-          <div class="info-label">网络延迟 (RTT)</div>
-          <div class="info-value" id="rtt">检测中...</div>
-        </div>
-        <div class="info-item">
-          <div class="info-label">浏览器</div>
-          <div class="info-value" id="browserInfo" style="font-size:12px">检测中...</div>
-        </div>
-        <div class="info-item">
-          <div class="info-label">操作系统</div>
-          <div class="info-value" id="platform">检测中...</div>
-        </div>
-        <div class="info-item">
-          <div class="info-label">语言</div>
-          <div class="info-value" id="language">检测中...</div>
+    <!-- Tab 3: 本机信息 -->
+    <div class="ip-tab-content">
+      <div class="card">
+        <h2>💻 本机网络信息</h2>
+        <div class="ip-local-grid" id="localInfo">
+          <div class="ip-local-item">
+            <div class="ip-local-label">IP 地址</div>
+            <div class="ip-local-value" id="localIP">加载中...</div>
+          </div>
+          <div class="ip-local-item">
+            <div class="ip-local-label">主机名</div>
+            <div class="ip-local-value" id="localHostname">加载中...</div>
+          </div>
+          <div class="ip-local-item">
+            <div class="ip-local-label">用户代理</div>
+            <div class="ip-local-value" id="localUserAgent" style="font-size:12px;">加载中...</div>
+          </div>
+          <div class="ip-local-item">
+            <div class="ip-local-label">语言</div>
+            <div class="ip-local-value" id="localLanguage">加载中...</div>
+          </div>
+          <div class="ip-local-item">
+            <div class="ip-local-label">时区</div>
+            <div class="ip-local-value" id="localTimezone">加载中...</div>
+          </div>
+          <div class="ip-local-item">
+            <div class="ip-local-label">屏幕分辨率</div>
+            <div class="ip-local-value" id="localScreen">加载中...</div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- ===== Tab: 参考 ===== -->
-    <div class="card tab-content" id="tab-reference">
-      <h2>📖 网络参考信息</h2>
-
-      <div class="ref-section">
-        <h4>IP 地址类别</h4>
-        <table class="ref-table" id="ipClassTable">
-          <thead>
-            <tr>
-              <th>类别</th>
-              <th>范围</th>
-              <th>默认掩码</th>
-              <th>CIDR</th>
-              <th>主机数</th>
-              <th>类型</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr><td>A 类</td><td>1.0.0.0 - 126.255.255.255</td><td>255.0.0.0</td><td>/8</td><td>16,777,214</td><td>公有</td></tr>
-            <tr><td>B 类</td><td>128.0.0.0 - 191.255.255.255</td><td>255.255.0.0</td><td>/16</td><td>65,534</td><td>公有</td></tr>
-            <tr><td>C 类</td><td>192.0.0.0 - 223.255.255.255</td><td>255.255.255.0</td><td>/24</td><td>254</td><td>公有</td></tr>
-            <tr><td>D 类</td><td>224.0.0.0 - 239.255.255.255</td><td>N/A</td><td>N/A</td><td>组播</td><td>组播</td></tr>
-            <tr><td>E 类</td><td>240.0.0.0 - 255.255.255.255</td><td>N/A</td><td>N/A</td><td>保留</td><td>保留</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="ref-section">
-        <h4>私有地址范围</h4>
-        <table class="ref-table" id="privateRangeTable">
-          <thead>
-            <tr><th>地址范围</th><th>说明</th></tr>
-          </thead>
-          <tbody>
-            <tr><td>10.0.0.0/8</td><td>A 类私有地址</td></tr>
-            <tr><td>172.16.0.0/12</td><td>B 类私有地址</td></tr>
-            <tr><td>192.168.0.0/16</td><td>C 类私有地址</td></tr>
-            <tr><td>127.0.0.0/8</td><td>回环地址</td></tr>
-            <tr><td>169.254.0.0/16</td><td>链路本地地址</td></tr>
-            <tr><td>224.0.0.0/4</td><td>组播地址</td></tr>
-            <tr><td>240.0.0.0/4</td><td>保留地址</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="ref-section">
-        <h4>CIDR 前缀与子网掩码对照表</h4>
-        <table class="ref-table" id="cidrTable">
-          <thead>
-            <tr><th>前缀</th><th>子网掩码</th><th>可用主机数</th><th>前缀</th><th>子网掩码</th><th>可用主机数</th></tr>
-          </thead>
-          <tbody>
-            <tr><td>/0</td><td>0.0.0.0</td><td>4,294,967,294</td><td>/16</td><td>255.255.0.0</td><td>65,534</td></tr>
-            <tr><td>/1</td><td>128.0.0.0</td><td>2,147,483,646</td><td>/17</td><td>255.255.128.0</td><td>32,766</td></tr>
-            <tr><td>/2</td><td>192.0.0.0</td><td>1,073,741,822</td><td>/18</td><td>255.255.192.0</td><td>16,382</td></tr>
-            <tr><td>/3</td><td>224.0.0.0</td><td>536,870,910</td><td>/19</td><td>255.255.224.0</td><td>8,190</td></tr>
-            <tr><td>/4</td><td>240.0.0.0</td><td>268,435,454</td><td>/20</td><td>255.255.240.0</td><td>4,094</td></tr>
-            <tr><td>/5</td><td>248.0.0.0</td><td>134,217,726</td><td>/21</td><td>255.255.248.0</td><td>2,046</td></tr>
-            <tr><td>/6</td><td>252.0.0.0</td><td>67,108,862</td><td>/22</td><td>255.255.252.0</td><td>1,022</td></tr>
-            <tr><td>/7</td><td>254.0.0.0</td><td>33,554,430</td><td>/23</td><td>255.255.254.0</td><td>510</td></tr>
-            <tr><td>/8</td><td>255.0.0.0</td><td>16,777,214</td><td>/24</td><td>255.255.255.0</td><td>254</td></tr>
-            <tr><td>/9</td><td>255.128.0.0</td><td>8,388,606</td><td>/25</td><td>255.255.255.128</td><td>126</td></tr>
-            <tr><td>/10</td><td>255.192.0.0</td><td>4,194,302</td><td>/26</td><td>255.255.255.192</td><td>62</td></tr>
-            <tr><td>/11</td><td>255.224.0.0</td><td>2,097,150</td><td>/27</td><td>255.255.255.224</td><td>30</td></tr>
-            <tr><td>/12</td><td>255.240.0.0</td><td>1,048,574</td><td>/28</td><td>255.255.255.240</td><td>14</td></tr>
-            <tr><td>/13</td><td>255.248.0.0</td><td>524,286</td><td>/29</td><td>255.255.255.248</td><td>6</td></tr>
-            <tr><td>/14</td><td>255.252.0.0</td><td>262,142</td><td>/30</td><td>255.255.255.252</td><td>2</td></tr>
-            <tr><td>/15</td><td>255.254.0.0</td><td>131,070</td><td>/31</td><td>255.255.255.254</td><td>0</td></tr>
-            <tr><td colspan="3"></td><td>/32</td><td>255.255.255.255</td><td>1</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- ===== 历史记录 ===== -->
-    <div class="card">
-      <div class="history-header">
-        <h3>📋 历史记录</h3>
-        <button class="btn btn-small btn-danger" id="clearHistoryBtn">🗑️ 清空</button>
-      </div>
-      <div class="history-list" id="historyList">
-        <span class="history-empty">暂无记录</span>
+    <!-- Tab 4: 速查表 -->
+    <div class="ip-tab-content">
+      <div class="card">
+        <h2>📖 子网掩码速查表</h2>
+        <table class="ip-ref-table" id="subnetRefTable"></table>
       </div>
     </div>
   </div>
 
-  <!-- ===== 引入模块（顺序重要） ===== -->
   <script src="./config.js"></script>
   <script src="./network-engine.js"></script>
   <script src="./app.js"></script>

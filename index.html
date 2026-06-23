@@ -3,320 +3,760 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Web 小工具合集</title>
+  <title>Web 小工具合集 — 工具箱</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    /* ===== RESET & BASE ===== */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-      background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
-      min-height: 100vh;
-      color: #fff;
+    :root {
+      --bg-primary: #0a0a0f;
+      --bg-secondary: #111118;
+      --bg-card: #14141e;
+      --bg-card-hover: #1a1a28;
+      --border-subtle: rgba(255,255,255,0.06);
+      --border-hover: rgba(255,255,255,0.12);
+      --text-primary: #f0f0f5;
+      --text-secondary: #8888a0;
+      --text-tertiary: #5c5c78;
+      --accent-1: #6c5ce7;
+      --accent-2: #a29bfe;
+      --accent-3: #fd79a8;
+      --accent-4: #00cec9;
+      --accent-5: #fdcb6e;
+      --accent-6: #e17055;
+      --accent-7: #0984e3;
+      --accent-8: #00b894;
+      --accent-9: #d63031;
+      --accent-10: #6c5ce7;
+      --accent-11: #e84393;
+      --glow-purple: rgba(108,92,231,0.15);
+      --glow-teal: rgba(0,206,201,0.12);
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-xl: 28px;
+      --font-display: 'Plus Jakarta Sans', sans-serif;
+      --font-body: 'DM Sans', sans-serif;
     }
 
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    /* ===== NOISE OVERLAY ===== */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.035;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      background-repeat: repeat;
+      background-size: 256px 256px;
+    }
+
+    /* ===== AMBIENT GRADIENT ORBS ===== */
+    .ambient-orbs {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(100px);
+      opacity: 0.3;
+      animation: orbFloat 20s ease-in-out infinite;
+    }
+
+    .orb-1 {
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, var(--accent-1), transparent 70%);
+      top: -200px; left: -200px;
+      animation-delay: 0s;
+    }
+
+    .orb-2 {
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, var(--accent-4), transparent 70%);
+      bottom: -150px; right: -150px;
+      animation-delay: -7s;
+    }
+
+    .orb-3 {
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, var(--accent-3), transparent 70%);
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      animation-delay: -14s;
+    }
+
+    @keyframes orbFloat {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      25% { transform: translate(60px, -40px) scale(1.05); }
+      50% { transform: translate(-30px, 60px) scale(0.95); }
+      75% { transform: translate(40px, 30px) scale(1.02); }
+    }
+
+    /* ===== GRID BACKGROUND ===== */
+    .grid-bg {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+
+    /* ===== HEADER ===== */
     .header {
+      position: relative;
+      z-index: 1;
       text-align: center;
-      padding: 60px 20px 40px;
+      padding: 80px 24px 20px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .header-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 16px;
+      border-radius: 100px;
+      background: rgba(108,92,231,0.1);
+      border: 1px solid rgba(108,92,231,0.2);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--accent-2);
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+      animation: fadeSlideUp 0.8s ease both;
+    }
+
+    .header-badge .dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--accent-4);
+      animation: pulseDot 2s ease-in-out infinite;
+    }
+
+    @keyframes pulseDot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.8); }
     }
 
     .header h1 {
-      font-size: 42px;
+      font-family: var(--font-display);
+      font-size: clamp(36px, 6vw, 64px);
       font-weight: 800;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      margin-bottom: 16px;
+      animation: fadeSlideUp 0.8s ease 0.1s both;
+    }
+
+    .header h1 .gradient-text {
+      background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 30%, #fd79a8 70%, #fdcb6e 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      margin-bottom: 12px;
     }
 
     .header p {
-      color: rgba(255,255,255,0.6);
       font-size: 16px;
+      color: var(--text-secondary);
+      max-width: 500px;
+      margin: 0 auto;
+      animation: fadeSlideUp 0.8s ease 0.2s both;
+    }
+
+    .header-stats {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      margin-top: 28px;
+      animation: fadeSlideUp 0.8s ease 0.3s both;
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-number {
+      font-family: var(--font-display);
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 2px;
+    }
+
+    .stat-divider {
+      width: 1px;
+      background: var(--border-subtle);
+    }
+
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ===== TOOLS GRID ===== */
+    .tools-section {
+      position: relative;
+      z-index: 1;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
     }
 
     .tools-grid {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 20px 60px;
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 24px;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 20px;
     }
 
+    /* ===== TOOL CARD ===== */
     .tool-card {
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 16px;
-      padding: 28px;
-      transition: all 0.3s ease;
-      cursor: pointer;
       position: relative;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
       overflow: hidden;
+      animation: cardAppear 0.6s ease both;
+    }
+
+    .tool-card:nth-child(1) { animation-delay: 0.05s; }
+    .tool-card:nth-child(2) { animation-delay: 0.10s; }
+    .tool-card:nth-child(3) { animation-delay: 0.15s; }
+    .tool-card:nth-child(4) { animation-delay: 0.20s; }
+    .tool-card:nth-child(5) { animation-delay: 0.25s; }
+    .tool-card:nth-child(6) { animation-delay: 0.30s; }
+    .tool-card:nth-child(7) { animation-delay: 0.35s; }
+    .tool-card:nth-child(8) { animation-delay: 0.40s; }
+    .tool-card:nth-child(9) { animation-delay: 0.45s; }
+    .tool-card:nth-child(10) { animation-delay: 0.50s; }
+    .tool-card:nth-child(11) { animation-delay: 0.55s; }
+
+    @keyframes cardAppear {
+      from { opacity: 0; transform: translateY(30px) scale(0.97); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
     }
 
     .tool-card::before {
       content: '';
       position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
+      top: 0; left: 0; right: 0;
       height: 3px;
-      background: linear-gradient(90deg, #667eea, #764ba2);
+      background: linear-gradient(90deg, var(--card-accent-1), var(--card-accent-2));
       opacity: 0;
-      transition: opacity 0.3s ease;
+      transition: opacity 0.4s ease;
+    }
+
+    .tool-card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      padding: 1px;
+      background: linear-gradient(135deg, var(--card-accent-1), transparent 50%, var(--card-accent-2));
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      pointer-events: none;
     }
 
     .tool-card:hover {
-      background: rgba(255,255,255,0.08);
-      border-color: rgba(255,255,255,0.2);
-      transform: translateY(-4px);
-      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+      background: var(--bg-card-hover);
+      border-color: var(--border-hover);
+      transform: translateY(-6px) scale(1.01);
+      box-shadow:
+        0 24px 48px -12px rgba(0,0,0,0.5),
+        0 0 0 1px rgba(108,92,231,0.08);
     }
 
-    .tool-card:hover::before {
-      opacity: 1;
-    }
+    .tool-card:hover::before { opacity: 1; }
+    .tool-card:hover::after { opacity: 1; }
 
-    .tool-icon {
-      font-size: 36px;
-      margin-bottom: 16px;
-      display: block;
-    }
+    /* Card accent colors */
+    .tool-card[data-accent="1"] { --card-accent-1: #6c5ce7; --card-accent-2: #a29bfe; }
+    .tool-card[data-accent="2"] { --card-accent-1: #00cec9; --card-accent-2: #55efc4; }
+    .tool-card[data-accent="3"] { --card-accent-1: #fd79a8; --card-accent-2: #e84393; }
+    .tool-card[data-accent="4"] { --card-accent-1: #fdcb6e; --card-accent-2: #e17055; }
+    .tool-card[data-accent="5"] { --card-accent-1: #0984e3; --card-accent-2: #74b9ff; }
+    .tool-card[data-accent="6"] { --card-accent-1: #00b894; --card-accent-2: #55efc4; }
+    .tool-card[data-accent="7"] { --card-accent-1: #e17055; --card-accent-2: #fdcb6e; }
+    .tool-card[data-accent="8"] { --card-accent-1: #a29bfe; --card-accent-2: #6c5ce7; }
+    .tool-card[data-accent="9"] { --card-accent-1: #d63031; --card-accent-2: #e17055; }
+    .tool-card[data-accent="10"] { --card-accent-1: #6c5ce7; --card-accent-2: #fd79a8; }
+    .tool-card[data-accent="11"] { --card-accent-1: #e84393; --card-accent-2: #fd79a8; }
 
-    .tool-name {
-      font-size: 20px;
-      font-weight: 700;
-      margin-bottom: 8px;
-      color: #fff;
-    }
-
-    .tool-desc {
-      font-size: 14px;
-      color: rgba(255,255,255,0.5);
-      line-height: 1.6;
-      margin-bottom: 16px;
-    }
-
-    .tool-tags {
+    /* Card icon area */
+    .card-icon-wrap {
       display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, var(--card-accent-1), var(--card-accent-2));
+      margin-bottom: 18px;
+      font-size: 22px;
+      transition: transform 0.3s ease;
+      position: relative;
     }
 
-    .tool-tag {
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 12px;
-      background: rgba(102, 126, 234, 0.2);
-      color: #667eea;
-      border: 1px solid rgba(102, 126, 234, 0.3);
+    .card-icon-wrap::after {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      border-radius: calc(var(--radius-md) + 2px);
+      background: linear-gradient(135deg, var(--card-accent-1), var(--card-accent-2));
+      opacity: 0.2;
+      filter: blur(8px);
+      z-index: -1;
+      transition: opacity 0.3s ease;
     }
 
-    .tool-link {
-      display: inline-block;
-      margin-top: 12px;
-      padding: 8px 20px;
-      border-radius: 8px;
+    .tool-card:hover .card-icon-wrap {
+      transform: scale(1.05);
+    }
+
+    .tool-card:hover .card-icon-wrap::after {
+      opacity: 0.4;
+    }
+
+    .card-icon-wrap .icon-emoji {
+      filter: grayscale(0.1);
+    }
+
+    /* Card content */
+    .card-name {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+      letter-spacing: -0.01em;
+    }
+
+    .card-desc {
       font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.65;
+      margin-bottom: 18px;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    /* Tags */
+    .card-tags {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+
+    .card-tag {
+      padding: 3px 10px;
+      border-radius: 100px;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.2px;
+      background: rgba(255,255,255,0.04);
+      color: var(--text-tertiary);
+      border: 1px solid rgba(255,255,255,0.06);
+      transition: all 0.2s ease;
+    }
+
+    .tool-card:hover .card-tag {
+      background: rgba(255,255,255,0.06);
+      border-color: rgba(255,255,255,0.1);
+      color: var(--text-secondary);
+    }
+
+    /* Card link button */
+    .card-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 18px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
       font-weight: 600;
       color: #fff;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, var(--card-accent-1), var(--card-accent-2));
       text-decoration: none;
-      transition: all 0.2s;
+      transition: all 0.25s ease;
+      position: relative;
+      overflow: hidden;
     }
 
-    .tool-link:hover {
-      transform: scale(1.05);
-      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    .card-link::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, transparent, rgba(255,255,255,0.15));
+      opacity: 0;
+      transition: opacity 0.25s ease;
     }
 
+    .card-link:hover::before { opacity: 1; }
+
+    .card-link:hover {
+      transform: translateX(2px);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    }
+
+    .card-link .arrow {
+      display: inline-block;
+      transition: transform 0.25s ease;
+    }
+
+    .card-link:hover .arrow {
+      transform: translateX(3px);
+    }
+
+    /* ===== FOOTER ===== */
     .footer {
+      position: relative;
+      z-index: 1;
       text-align: center;
-      padding: 30px;
-      color: rgba(255,255,255,0.3);
-      font-size: 13px;
+      padding: 40px 24px 48px;
+      border-top: 1px solid var(--border-subtle);
+      max-width: 1280px;
+      margin: 0 auto;
     }
 
-    @media (max-width: 600px) {
+    .footer-inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 20px;
+    }
+
+    .footer-links a {
+      color: var(--text-tertiary);
+      text-decoration: none;
+      font-size: 13px;
+      transition: color 0.2s ease;
+    }
+
+    .footer-links a:hover {
+      color: var(--text-secondary);
+    }
+
+    .footer-copy {
+      font-size: 12px;
+      color: var(--text-tertiary);
+      letter-spacing: 0.3px;
+    }
+
+    .footer-copy .heart {
+      color: var(--accent-3);
+      display: inline-block;
+      animation: heartBeat 1.5s ease-in-out infinite;
+    }
+
+    @keyframes heartBeat {
+      0%, 100% { transform: scale(1); }
+      15% { transform: scale(1.2); }
+      30% { transform: scale(1); }
+      45% { transform: scale(1.15); }
+      60% { transform: scale(1); }
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+      .header { padding: 60px 20px 16px; }
+      .header-stats { gap: 20px; }
+      .tools-section { padding: 24px 16px 60px; }
+      .tools-grid { grid-template-columns: 1fr; gap: 16px; }
+      .tool-card { padding: 24px; }
+    }
+
+    @media (max-width: 480px) {
       .header h1 { font-size: 28px; }
-      .header { padding: 40px 20px 30px; }
-      .tools-grid { grid-template-columns: 1fr; padding: 0 16px 40px; }
+      .header-stats { flex-wrap: wrap; gap: 16px; }
+      .stat-divider { display: none; }
+    }
+
+    /* ===== REDUCED MOTION ===== */
+    @media (prefers-reduced-motion: reduce) {
+      .orb, .header-badge .dot, .tool-card, .card-link .arrow,
+      .footer-copy .heart { animation: none !important; }
+      .tool-card { opacity: 1 !important; transform: none !important; }
+      .header h1, .header p, .header-badge, .header-stats { animation: none !important; opacity: 1 !important; }
     }
   </style>
 </head>
 <body>
-  <div class="header">
-    <h1>🛠️ Web 小工具合集</h1>
-    <p>原生无依赖 · 即开即用 · 纯前端实现</p>
+
+  <!-- Ambient Background -->
+  <div class="ambient-orbs">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
   </div>
+  <div class="grid-bg"></div>
 
-  <div class="tools-grid">
-    <div class="tool-card" onclick="location.href='tools/signature-pad/index.html'">
-      <span class="tool-icon">✍️</span>
-      <div class="tool-name">手写签名插件</div>
-      <div class="tool-desc">
-        支持鼠标 + 手写笔签名，速度感知仿真笔迹，收笔笔锋效果，可保存为 PNG base64 并自动上传
-      </div>
-      <div class="tool-tags">
-        <span class="tool-tag">Canvas</span>
-        <span class="tool-tag">手写仿真</span>
-        <span class="tool-tag">自动上传</span>
-      </div>
-      <a class="tool-link" href="tools/signature-pad/index.html">打开 →</a>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-badge">
+      <span class="dot"></span>
+      纯前端 · 零依赖
     </div>
-
-    <div class="tool-card" onclick="location.href='tools/qrcode-generator/index.html'">
-      <span class="tool-icon">📱</span>
-      <div class="tool-name">二维码生成 & 解码</div>
-      <div class="tool-desc">
-        纯前端 QR 码生成与解码，支持自定义颜色/Logo/样式，可下载 PNG/SVG，支持图片上传解码、摄像头扫描
+    <h1>
+      <span class="gradient-text">Web 小工具合集</span>
+    </h1>
+    <p>一套精心打造的开发工具集 — 即开即用，优雅高效</p>
+    <div class="header-stats">
+      <div class="stat-item">
+        <div class="stat-number">11</div>
+        <div class="stat-label">工具</div>
       </div>
-      <div class="tool-tags">
-        <span class="tool-tag">QR Code</span>
-        <span class="tool-tag">生成</span>
-        <span class="tool-tag">解码</span>
-        <span class="tool-tag">摄像头</span>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <div class="stat-number">100%</div>
+        <div class="stat-label">纯前端</div>
       </div>
-      <a class="tool-link" href="tools/qrcode-generator/index.html">打开 →</a>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <div class="stat-number">0</div>
+        <div class="stat-label">依赖</div>
+      </div>
     </div>
+  </header>
 
-    <div class="tool-card" onclick="location.href='tools/date-calculator/index.html'">
-      <span class="tool-icon">📅</span>
-      <div class="tool-name">日期时间计算器</div>
-      <div class="tool-desc">
-        日期差计算、日期加减、时间戳互转、时区转换、节假日查询、年龄计算
+  <!-- Tools Grid -->
+  <section class="tools-section">
+    <div class="tools-grid">
+
+      <!-- 1. 手写签名插件 -->
+      <div class="tool-card" data-accent="1" onclick="location.href='tools/signature-pad/index.html'">
+        <div class="card-icon-wrap"><span class="icon-emoji">✍️</span></div>
+        <div class="card-name">手写签名插件</div>
+        <div class="card-desc">支持鼠标 + 手写笔签名，速度感知仿真笔迹，收笔笔锋效果，可保存为 PNG base64 并自动上传</div>
+        <div class="card-tags">
+          <span class="card-tag">Canvas</span>
+          <span class="card-tag">手写仿真</span>
+          <span class="card-tag">自动上传</span>
+        </div>
+        <a class="card-link" href="tools/signature-pad/index.html">
+          打开工具 <span class="arrow">→</span>
+        </a>
       </div>
-      <div class="tool-tags">
-        <span class="tool-tag">日期计算</span>
-        <span class="tool-tag">时间戳</span>
-        <span class="tool-tag">时区</span>
-        <span class="tool-tag">节假日</span>
+
+      <!-- 2. 二维码生成 & 解码 -->
+      <div class="tool-card" data-accent="2" onclick="location.href='tools/qrcode-generator/index.html'">
+        <div class="card-icon-wrap"><span class="icon-emoji">📱</span></div>
+        <div class="card-name">二维码生成 & 解码</div>
+        <div class="card-desc">纯前端 QR 码生成与解码，支持自定义颜色/Logo/样式，可下载 PNG/SVG，支持图片上传解码、摄像头扫描</div>
+        <div class="card-tags">
+          <span class="card-tag">QR Code</span>
+          <span class="card-tag">生成</span>
+          <span class="card-tag">解码</span>
+          <span class="card-tag">摄像头</span>
+        </div>
+        <a class="card-link" href="tools/qrcode-generator/index.html">
+          打开工具 <span class="arrow">→</span>
+        </a>
       </div>
-      <a class="tool-link" href="tools/date-calculator/index.html">打开 →</a>
+
+      <!-- 3. 日期时间计算器 -->
+      <div class="tool-card" data-accent="3" onclick="location.href='tools/date-calculator/index.html'">
+        <div class="card-icon-wrap"><span class="icon-emoji">📅</span></div>
+        <div class="card-name">日期时间计算器</div>
+        <div class="card-desc">日期差计算、日期加减、时间戳互转、时区转换、节假日查询、年龄计算</div>
+        <div class="card-tags">
+          <span class="card-tag">日期计算</span>
+          <span class="card-tag">时间戳</span>
+          <span class="card-tag">时区</span>
+          <span class="card-tag">节假日</span>
+        </div>
+        <a class="card-link" href="tools/date-calculator/index.html">
+          打开工具 <span class="arrow">→</span>
+        </a>
+      </div>
+
+      <!-- 4. 文本加密/编码工具箱 -->
+      <div class="tool-card" data-accent="4" onclick="location.href='tools/text-encoder/index.html'">
+        <div class="card-icon-wrap"><span class="icon-emoji">🔐</span></div>
+        <div class="card-name">文本加密/编码工具箱</div>
+        <div class="card-desc">Base64/URL/HTML 编解码、MD5/SHA 哈希计算、文本统计分析</div>
+        <div class="card-tags">
+          <span class="card-tag">编码</span>
+          <span class="card-tag">加密</span>
+          <span class="card-tag">哈希</span>
+          <span class="card-tag">统计</span>
+        </div>
+        <a class="card-link" href="tools/text-encoder/index.html">
+          打开工具 <span class="arrow">→</span>
+        </a>
+      </div>
+
+      <!-- 5. 单位换算工具 -->
+      <div class="tool-card" data-accent="5" onclick="location.href='tools/unit-converter/index.html'">
+        <div class="card-icon-wrap"><span class="icon-emoji">📐</span></div>
+        <div class="card-name">单位换算工具</div>
+        <div class="card-desc">长度/重量/温度/面积/体积/数据/速度/时间等 12 类别 100+ 单位实时换算</div>
+        <div class="card-tags">
+          <span class="card-tag">单位换算</span>
+          <span class="card-tag">长度</span>
+          <span class="card-tag">重量</span>
+          <span class="card-tag">温度</span>
+        </div>
+        <a class="card-link" href="tools/unit-converter/index.html">
+          打开工具 <span class="arrow">→</span>
+        </a>
+      </div>
+
+      <!-- 6. 颜色选择器 & 调色板 -->
+      <div class="tool-card" data-accent="6" onclick="location.href='tools/color-picker/index.html'">
+        <div class="card-icon-wrap"><span class="icon-emoji">🎨</span></div>
+        <div class="card-name">颜色选择器 & 调色板</div>
+        <div class="card-desc">颜色拾取器（HSL/RGB/HEX/HSV）、配色方案生成、图片取色、对比度检测</div>
+        <div class="card-tags">
+          <span class="card-tag">颜色选择</span>
+          <span class="card-tag">调色板</span>
+          <span class="card-tag">配色方案</span>
+          <span class="card-tag">对比度</span>
+        </div>
+        <a class="card-link" href="tools/color-picker/index.html">
+          打开工具 <span class="arrow">→</span>
+        </a>
+      </div>
+
+      <!-- 7. JSON 格式化 & 对比 -->
+      <div class="tool-card" data-accent="7" onclick="location.href='tools/json-formatter/index.html'">
+        <div class="card-icon-wrap"><span class="icon-emoji">🔄</span></div>
+        <div class="card-name">JSON 格式化 & 对比</div>
+        <div class="card-desc">JSON 格式化/压缩/校验、语法高亮、差异对比、路径查询、JSON/CSV 互转</div>
+        <div class="card-tags">
+          <span class="card-tag">JSON</span>
+          <span class="card-tag">格式化</span>
+          <span class="card-tag">对比</span>
+          <span class="card-tag">校验</span>
+        </div>
+        <a class="card-link" href="tools/json-formatter/index.html">
+          打开工具 <span class="arrow">→</span>
+        </a>
+      </div>
+
+      <!-- 8. 正则表达式测试工具 -->
+      <div class="tool-card" data-accent="8" onclick="location.href='tools/regex-tester/index.html'">
+        <div class="card-icon-wrap"><span class="icon-emoji">⏱️</span></div>
+        <div class="card-name">正则表达式测试工具</div>
+        <div class="card-desc">正则实时匹配与高亮、捕获组展示、替换测试、常用模板库、语法速查表、100+ 常用正则查询</div>
+        <div class="card-tags">
+          <span class="card-tag">正则</span>
+          <span class="card-tag">匹配</span>
+          <span class="card-tag">替换</span>
+          <span class="card-tag">查询</span>
+          <span class="card-tag">100+ 模板</span>
+        </div>
+        <a class="card-link" href="tools/regex-tester/index.html">
+          打开工具 <span class="arrow">→</span>
+        </a>
+      </div>
+
+      <!-- 9. 图片压缩 & 格式转换 -->
+      <div class="tool-card" data-accent="9" onclick="location.href='tools/image-tool/index.html'">
+        <div class="card-icon-wrap"><span class="icon-emoji">🖼️</span></div>
+        <div class="card-name">图片压缩 & 格式转换</div>
+        <div class="card-desc">图片压缩、PNG/JPEG/WebP/BMP 格式互转、尺寸调整、批量处理、拖拽上传</div>
+        <div class="card-tags">
+          <span class="card-tag">图片压缩</span>
+          <span class="card-tag">格式转换</span>
+          <span class="card-tag">批量处理</span>
+        </div>
+        <a class="card-link" href="tools/image-tool/index.html">
+          打开工具 <span class="arrow">→</span>
+        </a>
+      </div>
+
+      <!-- 10. Markdown 预览 & 编辑 -->
+      <div class="tool-card" data-accent="10" onclick="location.href='tools/markdown-editor/index.html'">
+        <div class="card-icon-wrap"><span class="icon-emoji">📝</span></div>
+        <div class="card-name">Markdown 预览 & 编辑</div>
+        <div class="card-desc">实时 Markdown 预览、工具栏快捷插入、常用模板、深色主题、导出 HTML</div>
+        <div class="card-tags">
+          <span class="card-tag">Markdown</span>
+          <span class="card-tag">预览</span>
+          <span class="card-tag">导出</span>
+        </div>
+        <a class="card-link" href="tools/markdown-editor/index.html">
+          打开工具 <span class="arrow">→</span>
+        </a>
+      </div>
+
+      <!-- 11. IP / 网络信息查询 -->
+      <div class="tool-card" data-accent="11" onclick="location.href='tools/ip-tool/index.html'">
+        <div class="card-icon-wrap"><span class="icon-emoji">🌐</span></div>
+        <div class="card-name">IP / 网络信息查询</div>
+        <div class="card-desc">IP 地址查询与验证、CIDR 计算、子网划分、本机网络信息、参考速查表</div>
+        <div class="card-tags">
+          <span class="card-tag">IP 查询</span>
+          <span class="card-tag">CIDR</span>
+          <span class="card-tag">子网</span>
+          <span class="card-tag">网络</span>
+        </div>
+        <a class="card-link" href="tools/ip-tool/index.html">
+          打开工具 <span class="arrow">→</span>
+        </a>
+      </div>
+
     </div>
+  </section>
 
-    <div class="tool-card" onclick="location.href='tools/text-encoder/index.html'">
-      <span class="tool-icon">🔐</span>
-      <div class="tool-name">文本加密/编码工具箱</div>
-      <div class="tool-desc">
-        Base64/URL/HTML 编解码、MD5/SHA 哈希计算、文本统计分析
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-links">
+        <a href="README.md">关于</a>
+        <a href="https://github.com/lilirg/tools" target="_blank" rel="noopener noreferrer">GitHub</a>
       </div>
-      <div class="tool-tags">
-        <span class="tool-tag">编码</span>
-        <span class="tool-tag">加密</span>
-        <span class="tool-tag">哈希</span>
-        <span class="tool-tag">统计</span>
+      <div class="footer-copy">
+        Web Tools Collection &copy; 2026 &mdash; Made with <span class="heart">♥</span> & vanilla JS
       </div>
-      <a class="tool-link" href="tools/text-encoder/index.html">打开 →</a>
     </div>
+  </footer>
 
-    <div class="tool-card" onclick="location.href='tools/unit-converter/index.html'">
-      <span class="tool-icon">📐</span>
-      <div class="tool-name">单位换算工具</div>
-      <div class="tool-desc">
-        长度/重量/温度/面积/体积/数据/速度/时间等 12 类别 100+ 单位实时换算
-      </div>
-      <div class="tool-tags">
-        <span class="tool-tag">单位换算</span>
-        <span class="tool-tag">长度</span>
-        <span class="tool-tag">重量</span>
-        <span class="tool-tag">温度</span>
-      </div>
-      <a class="tool-link" href="tools/unit-converter/index.html">打开 →</a>
-    </div>
-
-    <div class="tool-card" onclick="location.href='tools/color-picker/index.html'">
-      <span class="tool-icon">🎨</span>
-      <div class="tool-name">颜色选择器 & 调色板</div>
-      <div class="tool-desc">
-        颜色拾取器（HSL/RGB/HEX/HSV）、配色方案生成、图片取色、对比度检测
-      </div>
-      <div class="tool-tags">
-        <span class="tool-tag">颜色选择</span>
-        <span class="tool-tag">调色板</span>
-        <span class="tool-tag">配色方案</span>
-        <span class="tool-tag">对比度</span>
-      </div>
-      <a class="tool-link" href="tools/color-picker/index.html">打开 →</a>
-    </div>
-
-    <div class="tool-card" onclick="location.href='tools/json-formatter/index.html'">
-      <span class="tool-icon">🔄</span>
-      <div class="tool-name">JSON 格式化 & 对比</div>
-      <div class="tool-desc">
-        JSON 格式化/压缩/校验、语法高亮、差异对比、路径查询、JSON/CSV 互转
-      </div>
-      <div class="tool-tags">
-        <span class="tool-tag">JSON</span>
-        <span class="tool-tag">格式化</span>
-        <span class="tool-tag">对比</span>
-        <span class="tool-tag">校验</span>
-      </div>
-      <a class="tool-link" href="tools/json-formatter/index.html">打开 →</a>
-    </div>
-
-    <div class="tool-card" onclick="location.href='tools/regex-tester/index.html'">
-      <span class="tool-icon">⏱️</span>
-      <div class="tool-name">正则表达式测试工具</div>
-      <div class="tool-desc">
-        正则实时匹配与高亮、捕获组展示、替换测试、常用模板库、语法速查表、100+ 常用正则查询
-      </div>
-      <div class="tool-tags">
-        <span class="tool-tag">正则</span>
-        <span class="tool-tag">匹配</span>
-        <span class="tool-tag">替换</span>
-        <span class="tool-tag">查询</span>
-        <span class="tool-tag">100+ 模板</span>
-      </div>
-      <a class="tool-link" href="tools/regex-tester/index.html">打开 →</a>
-    </div>
-
-    <div class="tool-card" onclick="location.href='tools/image-tool/index.html'">
-      <span class="tool-icon">🖼️</span>
-      <div class="tool-name">图片压缩 & 格式转换</div>
-      <div class="tool-desc">
-        图片压缩、PNG/JPEG/WebP/BMP 格式互转、尺寸调整、批量处理、拖拽上传
-      </div>
-      <div class="tool-tags">
-        <span class="tool-tag">图片压缩</span>
-        <span class="tool-tag">格式转换</span>
-        <span class="tool-tag">批量处理</span>
-      </div>
-      <a class="tool-link" href="tools/image-tool/index.html">打开 →</a>
-    </div>
-
-    <div class="tool-card" onclick="location.href='tools/markdown-editor/index.html'">
-      <span class="tool-icon">📝</span>
-      <div class="tool-name">Markdown 预览 & 编辑</div>
-      <div class="tool-desc">
-        实时 Markdown 预览、工具栏快捷插入、常用模板、深色主题、导出 HTML
-      </div>
-      <div class="tool-tags">
-        <span class="tool-tag">Markdown</span>
-        <span class="tool-tag">预览</span>
-        <span class="tool-tag">导出</span>
-      </div>
-      <a class="tool-link" href="tools/markdown-editor/index.html">打开 →</a>
-    </div>
-
-    <div class="tool-card" onclick="location.href='tools/ip-tool/index.html'">
-      <span class="tool-icon">🌐</span>
-      <div class="tool-name">IP / 网络信息查询</div>
-      <div class="tool-desc">
-        IP 地址查询与验证、CIDR 计算、子网划分、本机网络信息、参考速查表
-      </div>
-      <div class="tool-tags">
-        <span class="tool-tag">IP 查询</span>
-        <span class="tool-tag">CIDR</span>
-        <span class="tool-tag">子网</span>
-        <span class="tool-tag">网络</span>
-      </div>
-      <a class="tool-link" href="tools/ip-tool/index.html">打开 →</a>
-    </div>
-  </div>
-
-  <div class="footer">
-    Web Tools Collection &copy; 2026
-  </div>
 </body>
 </html>

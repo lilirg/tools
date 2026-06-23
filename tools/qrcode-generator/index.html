@@ -3,65 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>二维码生成器 & 解码器</title>
+  <title>📱 二维码生成器 & 解码器</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../theme.css">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-      min-height: 100vh;
-      padding: 20px;
-    }
-
-    .container { max-width: 1000px; margin: 0 auto; }
-
-    .demo-title { text-align: center; margin-bottom: 30px; }
-    .demo-title h1 { font-size: 28px; color: #1a1a1a; margin-bottom: 8px; }
-    .demo-title p { color: #888; font-size: 14px; }
-
-    /* ===== 标签切换 ===== */
-    .tab-bar {
-      display: flex;
-      gap: 0;
-      margin-bottom: 24px;
-      background: #fff;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-    }
-
-    .tab-btn {
-      flex: 1;
-      padding: 14px 20px;
-      border: none;
-      background: transparent;
-      font-size: 15px;
-      font-weight: 600;
-      color: #999;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-family: inherit;
-      position: relative;
-    }
-
-    .tab-btn:hover { color: #666; }
-    .tab-btn.active {
-      color: #1677ff;
-      background: rgba(22, 119, 255, 0.06);
-    }
-    .tab-btn.active::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 20%;
-      right: 20%;
-      height: 3px;
-      background: #1677ff;
-      border-radius: 3px 3px 0 0;
-    }
-
-    /* ===== 主布局 ===== */
+    /* ===== Tool-specific styles ===== */
     .main-layout {
       display: grid;
       grid-template-columns: 1fr 360px;
@@ -69,18 +17,20 @@
       align-items: start;
     }
 
-    /* ===== 预览区 ===== */
     .preview-card {
-      background: #fff;
-      border-radius: 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: var(--radius-lg);
       padding: 30px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      box-shadow: var(--shadow-card);
       text-align: center;
     }
 
     .preview-card h2 {
+      font-family: var(--font-display);
       font-size: 18px;
-      color: #333;
+      font-weight: 700;
+      color: var(--text-primary);
       margin-bottom: 20px;
       text-align: left;
     }
@@ -97,12 +47,12 @@
     .qr-preview-wrapper canvas {
       max-width: 100%;
       height: auto;
-      border-radius: 8px;
+      border-radius: var(--radius-sm);
       image-rendering: pixelated;
     }
 
     .qr-placeholder {
-      color: #ccc;
+      color: var(--text-muted);
       font-size: 16px;
       text-align: center;
       padding: 40px;
@@ -117,18 +67,18 @@
     .qr-info {
       margin-top: 16px;
       padding: 12px 16px;
-      background: #f8f9fa;
-      border-radius: 8px;
+      background: var(--bg-input);
+      border-radius: var(--radius-sm);
       font-size: 13px;
-      color: #666;
+      color: var(--text-secondary);
       text-align: left;
       display: none;
+      border: 1px solid var(--border-subtle);
     }
 
     .qr-info.show { display: block; }
-    .qr-info span { color: #333; font-weight: 600; }
+    .qr-info span { color: var(--text-primary); font-weight: 600; }
 
-    /* ===== 下载按钮 ===== */
     .download-actions {
       display: flex;
       gap: 10px;
@@ -137,95 +87,24 @@
       justify-content: center;
     }
 
-    .btn {
-      padding: 10px 24px;
-      border: none;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-family: inherit;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .btn:hover { transform: translateY(-1px); }
-    .btn:active { transform: scale(0.98); }
-
-    .btn-primary { background: #1677ff; color: #fff; }
-    .btn-primary:hover { background: #4096ff; }
-    .btn-success { background: #52c41a; color: #fff; }
-    .btn-success:hover { background: #73d13d; }
-    .btn-default { background: #f0f0f0; color: #666; }
-    .btn-default:hover { background: #e0e0e0; }
-    .btn-danger { background: #ff4d4f; color: #fff; }
-    .btn-danger:hover { background: #ff7875; }
-    .btn-warning { background: #faad14; color: #fff; }
-    .btn-warning:hover { background: #ffc53d; }
-
-    /* ===== 控制面板 ===== */
     .control-panel {
-      background: #fff;
-      border-radius: 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: var(--radius-lg);
       padding: 24px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      box-shadow: var(--shadow-card);
     }
 
     .control-panel h2 {
+      font-family: var(--font-display);
       font-size: 16px;
-      color: #333;
+      font-weight: 700;
+      color: var(--text-primary);
       margin-bottom: 20px;
       padding-bottom: 12px;
-      border-bottom: 1px solid #f0f0f0;
+      border-bottom: 1px solid var(--border-subtle);
     }
 
-    .form-group {
-      margin-bottom: 18px;
-    }
-
-    .form-group label {
-      display: block;
-      font-size: 13px;
-      font-weight: 600;
-      color: #555;
-      margin-bottom: 6px;
-    }
-
-    .form-group textarea,
-    .form-group input[type="text"],
-    .form-group select {
-      width: 100%;
-      padding: 10px 12px;
-      border: 1px solid #d9d9d9;
-      border-radius: 8px;
-      font-size: 14px;
-      transition: border-color 0.2s;
-      font-family: inherit;
-      background: #fff;
-    }
-
-    .form-group textarea:focus,
-    .form-group input[type="text"]:focus,
-    .form-group select:focus {
-      outline: none;
-      border-color: #1677ff;
-      box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.1);
-    }
-
-    .form-group textarea {
-      resize: vertical;
-      min-height: 60px;
-    }
-
-    .form-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-
-    /* ===== 颜色选择 ===== */
     .color-input-group {
       display: flex;
       align-items: center;
@@ -235,18 +114,17 @@
     .color-input-group input[type="color"] {
       width: 40px;
       height: 40px;
-      border: 2px solid #e8e8e8;
-      border-radius: 8px;
+      border: 2px solid var(--border-input);
+      border-radius: var(--radius-sm);
       cursor: pointer;
       padding: 2px;
-      background: #fff;
+      background: var(--bg-input);
     }
 
     .color-input-group input[type="text"] {
       flex: 1;
     }
 
-    /* ===== 预设颜色 ===== */
     .preset-colors {
       display: grid;
       grid-template-columns: repeat(6, 1fr);
@@ -258,9 +136,9 @@
       width: 100%;
       aspect-ratio: 1;
       border: 2px solid transparent;
-      border-radius: 8px;
+      border-radius: var(--radius-sm);
       cursor: pointer;
-      transition: all 0.2s;
+      transition: var(--transition);
       position: relative;
       overflow: hidden;
     }
@@ -271,15 +149,13 @@
     }
 
     .preset-color-btn.active {
-      border-color: #1677ff;
-      box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.3);
+      border-color: var(--accent-1);
+      box-shadow: 0 0 0 2px rgba(108,92,231,0.3);
     }
 
     .preset-color-btn .color-label {
       position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
+      bottom: 0; left: 0; right: 0;
       font-size: 8px;
       text-align: center;
       background: rgba(0,0,0,0.5);
@@ -290,7 +166,6 @@
       text-overflow: ellipsis;
     }
 
-    /* ===== 尺寸滑块 ===== */
     .size-slider-group {
       display: flex;
       align-items: center;
@@ -303,7 +178,7 @@
       appearance: none;
       height: 6px;
       border-radius: 3px;
-      background: #e8e8e8;
+      background: var(--text-muted);
       outline: none;
     }
 
@@ -313,48 +188,45 @@
       width: 20px;
       height: 20px;
       border-radius: 50%;
-      background: #1677ff;
+      background: var(--accent-1);
       cursor: pointer;
-      border: 2px solid #fff;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      border: 2px solid var(--bg-card);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
     }
 
     .size-value {
       font-size: 14px;
       font-weight: 600;
-      color: #333;
+      color: var(--text-primary);
       min-width: 40px;
       text-align: center;
     }
 
-    /* ===== Logo 上传 ===== */
     .logo-upload-area {
-      border: 2px dashed #d9d9d9;
-      border-radius: 8px;
+      border: 2px dashed var(--border-input);
+      border-radius: var(--radius-sm);
       padding: 16px;
       text-align: center;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: var(--transition);
       position: relative;
     }
 
     .logo-upload-area:hover {
-      border-color: #1677ff;
-      background: rgba(22, 119, 255, 0.02);
+      border-color: var(--accent-1);
+      background: var(--bg-highlight);
     }
 
     .logo-upload-area.has-logo {
-      border-color: #52c41a;
-      background: rgba(82, 196, 26, 0.02);
+      border-color: var(--accent-8);
+      background: rgba(0,184,148,0.05);
     }
 
-    .logo-upload-area input[type="file"] {
-      display: none;
-    }
+    .logo-upload-area input[type="file"] { display: none; }
 
     .logo-upload-area .upload-hint {
       font-size: 13px;
-      color: #999;
+      color: var(--text-tertiary);
     }
 
     .logo-upload-area .upload-hint .icon {
@@ -376,12 +248,10 @@
 
     .logo-remove-btn {
       position: absolute;
-      top: 4px;
-      right: 4px;
-      width: 20px;
-      height: 20px;
+      top: 4px; right: 4px;
+      width: 20px; height: 20px;
       border-radius: 50%;
-      background: #ff4d4f;
+      background: var(--accent-9);
       color: #fff;
       border: none;
       cursor: pointer;
@@ -393,36 +263,31 @@
 
     .logo-upload-area.has-logo .logo-remove-btn { display: block; }
 
-    /* ===== 高级选项 ===== */
     .advanced-toggle {
       display: flex;
       align-items: center;
       gap: 6px;
       font-size: 13px;
-      color: #1677ff;
+      color: var(--accent-2);
       cursor: pointer;
       margin-bottom: 12px;
       user-select: none;
     }
 
-    .advanced-toggle:hover { color: #4096ff; }
+    .advanced-toggle:hover { color: var(--accent-1); }
 
-    .advanced-options {
-      display: none;
-    }
-
+    .advanced-options { display: none; }
     .advanced-options.show { display: block; }
 
-    /* ===== 历史记录 ===== */
     .history-section {
       margin-top: 20px;
       padding-top: 16px;
-      border-top: 1px solid #f0f0f0;
+      border-top: 1px solid var(--border-subtle);
     }
 
     .history-section h3 {
       font-size: 14px;
-      color: #555;
+      color: var(--text-secondary);
       margin-bottom: 10px;
     }
 
@@ -433,35 +298,31 @@
     }
 
     .history-item {
-      width: 48px;
-      height: 48px;
-      border: 2px solid #e8e8e8;
-      border-radius: 8px;
+      width: 48px; height: 48px;
+      border: 2px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
       cursor: pointer;
-      transition: all 0.2s;
+      transition: var(--transition);
       overflow: hidden;
       position: relative;
     }
 
     .history-item:hover {
-      border-color: #1677ff;
+      border-color: var(--accent-1);
       transform: scale(1.1);
     }
 
     .history-item img {
-      width: 100%;
-      height: 100%;
+      width: 100%; height: 100%;
       object-fit: cover;
     }
 
     .history-item .remove-history {
       position: absolute;
-      top: -2px;
-      right: -2px;
-      width: 16px;
-      height: 16px;
+      top: -2px; right: -2px;
+      width: 16px; height: 16px;
       border-radius: 50%;
-      background: #ff4d4f;
+      background: var(--accent-9);
       color: #fff;
       border: none;
       font-size: 10px;
@@ -475,39 +336,27 @@
 
     .history-empty {
       font-size: 13px;
-      color: #ccc;
+      color: var(--text-muted);
     }
 
-    /* ===== 解码器样式 ===== */
-    .decoder-section {
-      display: none;
-    }
-
-    .decoder-section.active {
-      display: block;
-    }
-
-    .generator-section {
-      display: block;
-    }
-
-    .generator-section.hidden {
-      display: none;
-    }
+    .decoder-section { display: none; }
+    .decoder-section.active { display: block; }
+    .generator-section { display: block; }
+    .generator-section.hidden { display: none; }
 
     .decoder-upload-area {
-      border: 2px dashed #d9d9d9;
-      border-radius: 12px;
+      border: 2px dashed var(--border-input);
+      border-radius: var(--radius-md);
       padding: 40px 20px;
       text-align: center;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: var(--transition);
       margin-bottom: 16px;
     }
 
     .decoder-upload-area:hover {
-      border-color: #1677ff;
-      background: rgba(22, 119, 255, 0.02);
+      border-color: var(--accent-1);
+      background: var(--bg-highlight);
     }
 
     .decoder-upload-area .upload-icon {
@@ -518,32 +367,28 @@
 
     .decoder-upload-area .upload-text {
       font-size: 15px;
-      color: #666;
+      color: var(--text-secondary);
       margin-bottom: 4px;
     }
 
     .decoder-upload-area .upload-hint {
       font-size: 12px;
-      color: #999;
+      color: var(--text-tertiary);
     }
 
-    .decoder-upload-area input[type="file"] {
-      display: none;
-    }
+    .decoder-upload-area input[type="file"] { display: none; }
 
     .decoder-preview-wrapper {
       display: none;
       margin-bottom: 16px;
     }
 
-    .decoder-preview-wrapper.show {
-      display: block;
-    }
+    .decoder-preview-wrapper.show { display: block; }
 
     .decoder-preview-wrapper img {
       max-width: 100%;
       max-height: 300px;
-      border-radius: 8px;
+      border-radius: var(--radius-sm);
       margin: 0 auto;
       display: block;
     }
@@ -552,25 +397,23 @@
       display: none;
       margin-top: 16px;
       padding: 16px;
-      background: #f6ffed;
-      border: 1px solid #b7eb8f;
-      border-radius: 8px;
+      background: rgba(0,184,148,0.08);
+      border: 1px solid rgba(0,184,148,0.2);
+      border-radius: var(--radius-sm);
     }
 
-    .decoder-result.show {
-      display: block;
-    }
+    .decoder-result.show { display: block; }
 
     .decoder-result .result-label {
       font-size: 12px;
-      color: #52c41a;
+      color: var(--accent-8);
       font-weight: 600;
       margin-bottom: 8px;
     }
 
     .decoder-result .result-content {
       font-size: 14px;
-      color: #333;
+      color: var(--text-primary);
       word-break: break-all;
       line-height: 1.6;
       max-height: 200px;
@@ -588,33 +431,29 @@
       display: none;
       margin-top: 16px;
       padding: 12px 16px;
-      background: #fff2f0;
-      border: 1px solid #ffccc7;
-      border-radius: 8px;
-      color: #ff4d4f;
+      background: rgba(214,48,49,0.1);
+      border: 1px solid rgba(214,48,49,0.3);
+      border-radius: var(--radius-sm);
+      color: var(--accent-3);
       font-size: 14px;
     }
 
-    .decoder-error.show {
-      display: block;
-    }
+    .decoder-error.show { display: block; }
 
     .decoder-camera-section {
       margin-top: 16px;
       padding-top: 16px;
-      border-top: 1px solid #f0f0f0;
+      border-top: 1px solid var(--border-subtle);
     }
 
     .decoder-camera-section video {
       width: 100%;
-      border-radius: 8px;
+      border-radius: var(--radius-sm);
       background: #000;
       display: none;
     }
 
-    .decoder-camera-section video.show {
-      display: block;
-    }
+    .decoder-camera-section video.show { display: block; }
 
     .decoder-camera-actions {
       display: flex;
@@ -622,50 +461,16 @@
       margin-top: 12px;
     }
 
-    .decoder-camera-actions .btn {
-      flex: 1;
-      justify-content: center;
-    }
+    .decoder-camera-actions .btn { flex: 1; justify-content: center; }
 
-    /* ===== Toast ===== */
-    .qr-toast {
-      position: fixed;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%) translateY(-20px);
-      padding: 10px 24px;
-      border-radius: 8px;
-      font-size: 14px;
-      color: #fff;
-      z-index: 100000;
-      opacity: 0;
-      transition: all 0.3s ease;
-      pointer-events: none;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    }
-
-    .qr-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-    .qr-toast.hide { opacity: 0; transform: translateX(-50%) translateY(-20px); }
-    .qr-toast-success { background: #52c41a; }
-    .qr-toast-error { background: #ff4d4f; }
-    .qr-toast-warning { background: #faad14; color: #333; }
-    .qr-toast-info { background: #1677ff; }
-
-    /* ===== 响应式 ===== */
     @media (max-width: 768px) {
-      .main-layout {
-        grid-template-columns: 1fr;
-      }
-
-      .demo-title h1 { font-size: 24px; }
+      .main-layout { grid-template-columns: 1fr; }
       .preview-card { padding: 20px; }
       .control-panel { padding: 20px; }
-      .form-row { grid-template-columns: 1fr; }
       .preset-colors { grid-template-columns: repeat(4, 1fr); }
     }
 
     @media (max-width: 400px) {
-      body { padding: 12px; }
       .preview-card { padding: 16px; }
       .control-panel { padding: 16px; }
       .download-actions .btn { flex: 1; text-align: center; justify-content: center; }
@@ -674,6 +479,9 @@
 </head>
 <body>
   <div class="container">
+    <div class="back-bar">
+      <a class="back-btn" href="../index.html">← 返回首页</a>
+    </div>
     <div class="demo-title">
       <h1>📱 二维码工具</h1>
       <p>纯前端实现 · 生成 & 解码 · 支持自定义颜色/Logo/样式</p>
@@ -688,7 +496,6 @@
     <div class="main-layout">
       <!-- ===== 预览区 ===== -->
       <div class="preview-card">
-        <!-- 生成器预览 -->
         <div class="generator-section" id="generatorSection">
           <h2>🔲 二维码预览</h2>
           <div class="qr-preview-wrapper">
@@ -712,7 +519,6 @@
           </div>
         </div>
 
-        <!-- 解码器预览 -->
         <div class="decoder-section" id="decoderSection">
           <h2>🔍 二维码解码</h2>
 
@@ -741,7 +547,7 @@
           </div>
 
           <div class="decoder-camera-section">
-            <h3 style="font-size:14px;color:#555;margin-bottom:10px;">📸 摄像头扫描</h3>
+            <h3 style="font-size:14px;color:var(--text-secondary);margin-bottom:10px;">📸 摄像头扫描</h3>
             <video id="decoderVideo" autoplay playsinline></video>
             <div class="decoder-camera-actions">
               <button class="btn btn-primary" id="startCameraBtn">📷 开启摄像头</button>
@@ -754,7 +560,6 @@
 
       <!-- ===== 控制面板 ===== -->
       <div class="control-panel">
-        <!-- 生成器设置 -->
         <div class="generator-section" id="generatorSettings">
           <h2>⚙️ 生成设置</h2>
 
@@ -867,7 +672,6 @@
             </div>
           </div>
 
-          <!-- ===== 历史记录 ===== -->
           <div class="history-section">
             <h3>📋 历史记录</h3>
             <div class="history-list" id="historyList">
@@ -876,18 +680,17 @@
           </div>
         </div>
 
-        <!-- 解码器设置 -->
         <div class="decoder-section" id="decoderSettings">
           <h2>⚙️ 解码信息</h2>
           <div class="form-group">
             <label>📊 解码状态</label>
-            <div style="padding:12px;background:#f8f9fa;border-radius:8px;font-size:13px;color:#666;">
+            <div style="padding:12px;background:var(--bg-input);border-radius:var(--radius-sm);font-size:13px;color:var(--text-secondary);">
               <div id="decoderStatus">等待上传图片...</div>
             </div>
           </div>
           <div class="form-group">
             <label>📋 使用说明</label>
-            <div style="padding:12px;background:#f8f9fa;border-radius:8px;font-size:12px;color:#888;line-height:1.8;">
+            <div style="padding:12px;background:var(--bg-input);border-radius:var(--radius-sm);font-size:12px;color:var(--text-tertiary);line-height:1.8;">
               <div>1. 点击上方区域上传二维码图片</div>
               <div>2. 或使用摄像头实时扫描</div>
               <div>3. 解码结果将自动显示</div>
@@ -899,7 +702,6 @@
     </div>
   </div>
 
-  <!-- ===== 引入模块 ===== -->
   <script src="./config.js"></script>
   <script src="./qrcode-lib.js"></script>
   <script src="./qrcode-decoder.js"></script>

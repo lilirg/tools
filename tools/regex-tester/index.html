@@ -4,46 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>⏱️ 正则表达式测试工具</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../theme.css">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-      min-height: 100vh;
-      padding: 20px;
-    }
-
-    .container { max-width: 900px; margin: 0 auto; }
-
-    .demo-title { text-align: center; margin-bottom: 30px; }
-    .demo-title h1 { font-size: 28px; color: #1a1a1a; margin-bottom: 8px; }
-    .demo-title p { color: #888; font-size: 14px; }
-
-    /* ===== 卡片 ===== */
-    .card {
-      background: #fff;
-      border-radius: 12px;
-      padding: 24px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-      margin-bottom: 20px;
-    }
-
-    .card h2 {
-      font-size: 16px;
-      color: #333;
-      margin-bottom: 16px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid #f0f0f0;
-    }
-
-    .card h3 {
-      font-size: 14px;
-      color: #555;
-      margin-bottom: 12px;
-    }
-
-    /* ===== 正则查询 ===== */
+    /* ===== Tool-specific styles ===== */
     .rq-search-row {
       display: flex;
       gap: 8px;
@@ -53,18 +19,19 @@
     .rq-search-row input {
       flex: 1;
       padding: 10px 14px;
-      border: 2px solid #d9d9d9;
-      border-radius: 8px;
+      border: 2px solid var(--border-input);
+      border-radius: var(--radius-sm);
       font-size: 15px;
-      font-family: inherit;
-      background: #f8f9fa;
-      transition: border-color 0.2s;
+      font-family: var(--font-body);
+      background: var(--bg-input);
+      color: var(--text-primary);
+      transition: var(--transition);
     }
 
     .rq-search-row input:focus {
       outline: none;
-      border-color: #1677ff;
-      box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.1);
+      border-color: var(--accent-1);
+      box-shadow: 0 0 0 2px rgba(108,92,231,0.15);
     }
 
     .rq-category-filter {
@@ -76,25 +43,25 @@
 
     .rq-category-btn {
       padding: 4px 12px;
-      border: 1px solid #d9d9d9;
+      border: 1px solid var(--border-subtle);
       border-radius: 16px;
       font-size: 12px;
       cursor: pointer;
-      background: #fff;
-      color: #666;
-      transition: all 0.2s;
-      font-family: inherit;
+      background: transparent;
+      color: var(--text-tertiary);
+      transition: var(--transition);
+      font-family: var(--font-body);
     }
 
     .rq-category-btn:hover {
-      border-color: #1677ff;
-      color: #1677ff;
+      border-color: var(--accent-1);
+      color: var(--accent-2);
     }
 
     .rq-category-btn.active {
-      background: #1677ff;
+      background: var(--accent-1);
       color: #fff;
-      border-color: #1677ff;
+      border-color: var(--accent-1);
     }
 
     .rq-stats-bar {
@@ -103,25 +70,24 @@
       align-items: center;
       margin-bottom: 12px;
       font-size: 13px;
-      color: #999;
+      color: var(--text-tertiary);
     }
 
     .rq-results {
       max-height: 400px;
       overflow-y: auto;
-      border: 1px solid #f0f0f0;
-      border-radius: 8px;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
     }
 
     .rq-result-item {
       padding: 12px 14px;
-      border-bottom: 1px solid #f5f5f5;
+      border-bottom: 1px solid var(--border-subtle);
       cursor: pointer;
       transition: background 0.15s;
     }
-
     .rq-result-item:last-child { border-bottom: none; }
-    .rq-result-item:hover { background: #f8f9ff; }
+    .rq-result-item:hover { background: var(--bg-tab-hover); }
 
     .rq-result-header {
       display: flex;
@@ -133,30 +99,30 @@
     .rq-result-name {
       font-size: 14px;
       font-weight: 600;
-      color: #333;
+      color: var(--text-primary);
     }
 
     .rq-result-category {
       font-size: 11px;
       padding: 1px 8px;
-      background: #e6f7ff;
-      color: #1677ff;
+      background: var(--bg-highlight);
+      color: var(--accent-2);
       border-radius: 10px;
       white-space: nowrap;
     }
 
     .rq-result-desc {
       font-size: 12px;
-      color: #888;
+      color: var(--text-tertiary);
       margin-bottom: 6px;
       line-height: 1.4;
     }
 
     .rq-result-pattern {
       font-size: 12px;
-      font-family: 'Courier New', monospace;
-      color: #52c41a;
-      background: #f6ffed;
+      font-family: var(--font-mono);
+      color: var(--accent-8);
+      background: rgba(0,184,148,0.08);
       padding: 4px 8px;
       border-radius: 4px;
       word-break: break-all;
@@ -164,9 +130,10 @@
     }
 
     .rq-result-pattern .rq-highlight {
-      background: #ffd43b;
+      background: var(--accent-5);
       padding: 0 2px;
       border-radius: 2px;
+      color: #333;
     }
 
     .rq-result-actions {
@@ -181,79 +148,54 @@
       border-radius: 4px;
       font-size: 11px;
       cursor: pointer;
-      background: #1677ff;
+      background: var(--accent-1);
       color: #fff;
-      transition: all 0.2s;
-      font-family: inherit;
+      transition: var(--transition);
+      font-family: var(--font-body);
     }
 
-    .rq-use-btn:hover {
-      background: #4096ff;
-    }
+    .rq-use-btn:hover { background: var(--accent-2); }
 
     .rq-copy-btn {
       padding: 3px 10px;
-      border: 1px solid #d9d9d9;
+      border: 1px solid var(--border-subtle);
       border-radius: 4px;
       font-size: 11px;
       cursor: pointer;
-      background: #fff;
-      color: #666;
-      transition: all 0.2s;
-      font-family: inherit;
+      background: transparent;
+      color: var(--text-tertiary);
+      transition: var(--transition);
+      font-family: var(--font-body);
     }
 
-    .rq-copy-btn:hover {
-      border-color: #1677ff;
-      color: #1677ff;
-    }
+    .rq-copy-btn:hover { border-color: var(--accent-1); color: var(--accent-2); }
 
     .rq-empty {
       text-align: center;
       padding: 30px 20px;
-      color: #ccc;
+      color: var(--text-muted);
       font-size: 14px;
     }
 
-    .rq-empty-icon {
-      font-size: 36px;
-      margin-bottom: 8px;
-      display: block;
-    }
+    .rq-empty-icon { font-size: 36px; margin-bottom: 8px; display: block; }
+    .rq-empty-text { font-size: 13px; color: var(--text-muted); }
 
-    .rq-empty-text {
-      font-size: 13px;
-      color: #bbb;
-    }
-
-    .rq-match-highlight {
-      background: #ffd43b;
-      padding: 0 2px;
-      border-radius: 2px;
-    }
-
-    /* ===== 模板选择 ===== */
-    .template-row {
-      margin-bottom: 16px;
-    }
+    .template-row { margin-bottom: 16px; }
 
     .template-row select {
       width: 100%;
       padding: 8px 12px;
-      border: 1px solid #d9d9d9;
-      border-radius: 8px;
+      border: 1px solid var(--border-input);
+      border-radius: var(--radius-sm);
       font-size: 14px;
-      font-family: inherit;
-      background: #fff;
+      font-family: var(--font-body);
+      background: var(--bg-input);
+      color: var(--text-primary);
       cursor: pointer;
     }
 
-    .template-row select:focus {
-      outline: none;
-      border-color: #1677ff;
-    }
+    .template-row select:focus { outline: none; border-color: var(--accent-1); }
 
-    /* ===== 正则输入 ===== */
     .pattern-row {
       display: flex;
       align-items: center;
@@ -264,36 +206,34 @@
     .pattern-row input {
       flex: 1;
       padding: 10px 14px;
-      border: 2px solid #d9d9d9;
-      border-radius: 8px;
+      border: 2px solid var(--border-input);
+      border-radius: var(--radius-sm);
       font-size: 15px;
-      font-family: 'Courier New', monospace;
-      background: #f8f9fa;
+      font-family: var(--font-mono);
+      background: var(--bg-input);
+      color: var(--text-primary);
     }
 
     .pattern-row input:focus {
       outline: none;
-      border-color: #1677ff;
-      box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.1);
+      border-color: var(--accent-1);
+      box-shadow: 0 0 0 2px rgba(108,92,231,0.15);
     }
 
     .rt-pattern-display {
       padding: 8px 12px;
-      background: #f0f0f0;
+      background: var(--bg-input);
       border-radius: 6px;
-      font-family: 'Courier New', monospace;
+      font-family: var(--font-mono);
       font-size: 14px;
-      color: #1677ff;
+      color: var(--accent-2);
       margin-bottom: 12px;
       word-break: break-all;
+      border: 1px solid var(--border-subtle);
     }
 
-    .rt-pattern-hint {
-      color: #ccc !important;
-      font-family: inherit !important;
-    }
+    .rt-pattern-hint { color: var(--text-muted) !important; font-family: var(--font-body) !important; }
 
-    /* ===== 修饰符 ===== */
     .flag-toggles {
       display: flex;
       gap: 8px;
@@ -306,32 +246,26 @@
       align-items: center;
       gap: 4px;
       padding: 4px 10px;
-      border: 1px solid #d9d9d9;
+      border: 1px solid var(--border-subtle);
       border-radius: 6px;
       font-size: 13px;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: var(--transition);
       user-select: none;
+      color: var(--text-tertiary);
     }
 
-    .rt-flag-label:hover {
-      border-color: #1677ff;
-      color: #1677ff;
-    }
+    .rt-flag-label:hover { border-color: var(--accent-1); color: var(--accent-2); }
 
-    .rt-flag-label input:checked + span {
-      color: #1677ff;
-      font-weight: 600;
-    }
+    .rt-flag-label input:checked + span { color: var(--accent-2); font-weight: 600; }
 
     .rt-flag-label:has(input:checked) {
-      border-color: #1677ff;
-      background: rgba(22, 119, 255, 0.06);
+      border-color: var(--accent-1);
+      background: var(--bg-highlight);
     }
 
     .rt-flag-label input { display: none; }
 
-    /* ===== 测试文本 ===== */
     .test-layout {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -342,61 +276,48 @@
       width: 100%;
       height: 200px;
       padding: 12px;
-      border: 1px solid #d9d9d9;
-      border-radius: 8px;
+      border: 1px solid var(--border-input);
+      border-radius: var(--radius-sm);
       font-size: 14px;
-      font-family: 'Courier New', monospace;
+      font-family: var(--font-mono);
       resize: vertical;
       line-height: 1.6;
+      background: var(--bg-input);
+      color: var(--text-primary);
     }
 
-    .test-layout textarea:focus {
-      outline: none;
-      border-color: #1677ff;
-    }
+    .test-layout textarea:focus { outline: none; border-color: var(--accent-1); }
 
     .rt-highlight-box {
       width: 100%;
       height: 200px;
       padding: 12px;
-      border: 1px solid #d9d9d9;
-      border-radius: 8px;
+      border: 1px solid var(--border-input);
+      border-radius: var(--radius-sm);
       font-size: 14px;
-      font-family: 'Courier New', monospace;
+      font-family: var(--font-mono);
       line-height: 1.6;
       overflow: auto;
-      background: #fafafa;
+      background: var(--bg-input);
       white-space: pre-wrap;
       word-break: break-all;
       position: relative;
+      color: var(--text-primary);
     }
 
-    /* ===== 匹配高亮 ===== */
-    .rt-match {
-      background: #ffd43b;
-      border-radius: 2px;
-      padding: 0 1px;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-
-    .rt-match:hover {
-      background: #fab005;
-    }
+    .rt-match { background: var(--accent-5); border-radius: 2px; padding: 0 1px; cursor: pointer; transition: background 0.2s; color: #333; }
+    .rt-match:hover { background: #fab005; }
 
     .rt-error-overlay {
       position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
+      bottom: 0; left: 0; right: 0;
       padding: 8px 12px;
-      background: rgba(255, 77, 79, 0.9);
+      background: rgba(214,48,49,0.9);
       color: #fff;
       font-size: 12px;
-      font-family: inherit;
+      font-family: var(--font-body);
     }
 
-    /* ===== 匹配结果 ===== */
     .match-info {
       display: flex;
       align-items: center;
@@ -405,13 +326,9 @@
       flex-wrap: wrap;
     }
 
-    .rt-match-count {
-      font-size: 14px;
-      font-weight: 600;
-    }
-
-    .rt-match-ok { color: #52c41a; }
-    .rt-match-error { color: #ff4d4f; font-size: 12px; }
+    .rt-match-count { font-size: 14px; font-weight: 600; }
+    .rt-match-ok { color: var(--accent-8); }
+    .rt-match-error { color: var(--accent-3); font-size: 12px; }
 
     .rt-match-list {
       margin-top: 12px;
@@ -421,67 +338,40 @@
 
     .rt-match-item {
       padding: 8px 10px;
-      border-bottom: 1px solid #f0f0f0;
+      border-bottom: 1px solid var(--border-subtle);
     }
-
     .rt-match-item:last-child { border-bottom: none; }
 
-    .rt-match-header {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 4px;
-    }
-
-    .rt-match-num {
-      font-weight: 600;
-      color: #1677ff;
-      font-size: 12px;
-    }
-
-    .rt-match-pos {
-      color: #999;
-      font-size: 12px;
-    }
+    .rt-match-header { display: flex; gap: 12px; margin-bottom: 4px; }
+    .rt-match-num { font-weight: 600; color: var(--accent-2); font-size: 12px; }
+    .rt-match-pos { color: var(--text-tertiary); font-size: 12px; }
 
     .rt-match-value {
-      font-family: 'Courier New', monospace;
+      font-family: var(--font-mono);
       font-size: 13px;
-      color: #333;
+      color: var(--text-primary);
       padding: 4px 8px;
-      background: #f8f9fa;
+      background: var(--bg-input);
       border-radius: 4px;
       word-break: break-all;
     }
 
-    .rt-match-groups {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-      margin-top: 4px;
-    }
+    .rt-match-groups { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
 
     .rt-group-item {
       font-size: 12px;
       padding: 2px 6px;
-      background: #e6f7ff;
+      background: var(--bg-highlight);
       border-radius: 4px;
     }
 
-    .rt-group-label {
-      color: #1677ff;
-      font-weight: 600;
-    }
+    .rt-group-label { color: var(--accent-2); font-weight: 600; }
+    .rt-group-value { color: var(--text-primary); font-family: var(--font-mono); }
 
-    .rt-group-value {
-      color: #333;
-      font-family: 'Courier New', monospace;
-    }
-
-    /* ===== 替换区域 ===== */
     .replace-area {
       margin-top: 16px;
       padding-top: 16px;
-      border-top: 1px solid #f0f0f0;
+      border-top: 1px solid var(--border-subtle);
     }
 
     .replace-row {
@@ -494,130 +384,86 @@
     .replace-row input {
       flex: 1;
       padding: 8px 12px;
-      border: 1px solid #d9d9d9;
+      border: 1px solid var(--border-input);
       border-radius: 6px;
       font-size: 14px;
-      font-family: 'Courier New', monospace;
+      font-family: var(--font-mono);
       min-width: 150px;
+      background: var(--bg-input);
+      color: var(--text-primary);
     }
 
-    .replace-row input:focus {
-      outline: none;
-      border-color: #1677ff;
-    }
+    .replace-row input:focus { outline: none; border-color: var(--accent-1); }
 
     .replace-result-box {
       margin-top: 8px;
       padding: 10px 12px;
-      background: #f8f9fa;
+      background: var(--bg-input);
       border-radius: 6px;
-      font-family: 'Courier New', monospace;
+      font-family: var(--font-mono);
       font-size: 13px;
       line-height: 1.5;
       min-height: 40px;
       word-break: break-all;
+      color: var(--text-primary);
+      border: 1px solid var(--border-subtle);
     }
 
-    .replace-count {
-      font-size: 12px;
-      color: #999;
-      margin-top: 4px;
-    }
+    .replace-count { font-size: 12px; color: var(--text-tertiary); margin-top: 4px; }
 
-    /* ===== 语法参考 ===== */
     .rt-syntax-toggle {
       padding: 10px 14px;
-      background: #f8f9fa;
-      border: 1px solid #e8e8e8;
-      border-radius: 8px;
+      background: var(--bg-input);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
       cursor: pointer;
       font-size: 14px;
-      color: #555;
-      transition: all 0.2s;
-      font-family: inherit;
+      color: var(--text-secondary);
+      transition: var(--transition);
+      font-family: var(--font-body);
       width: 100%;
       text-align: left;
     }
 
-    .rt-syntax-toggle:hover {
-      background: #f0f0f0;
-      color: #333;
-    }
+    .rt-syntax-toggle:hover { background: var(--bg-tab-hover); color: var(--text-primary); }
 
-    .rt-syntax-content {
-      display: none;
-      margin-top: 12px;
-    }
+    .rt-syntax-content { display: none; margin-top: 12px; }
 
-    .rt-syntax-section {
-      margin-bottom: 16px;
-    }
+    .rt-syntax-section { margin-bottom: 16px; }
 
     .rt-syntax-section h4 {
       font-size: 14px;
-      color: #333;
+      color: var(--text-primary);
       margin-bottom: 8px;
       padding-bottom: 4px;
-      border-bottom: 1px solid #f0f0f0;
+      border-bottom: 1px solid var(--border-subtle);
     }
 
-    .rt-syntax-table {
-      width: 100%;
-      border-collapse: collapse;
-    }
+    .rt-syntax-table { width: 100%; border-collapse: collapse; }
 
     .rt-syntax-table td {
       padding: 4px 8px;
       font-size: 13px;
-      border-bottom: 1px solid #f5f5f5;
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
     }
 
     .rt-syntax-code {
       width: 120px;
-      font-family: 'Courier New', monospace;
-      color: #1677ff;
+      font-family: var(--font-mono);
+      color: var(--accent-2);
       font-weight: 600;
     }
 
     .rt-syntax-code code {
-      background: #f0f0f0;
+      background: var(--bg-input);
       padding: 2px 6px;
       border-radius: 3px;
       font-size: 13px;
     }
 
-    .rt-syntax-desc {
-      color: #666;
-    }
+    .rt-syntax-desc { color: var(--text-tertiary); }
 
-    /* ===== 按钮 ===== */
-    .btn {
-      padding: 8px 20px;
-      border: none;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-family: inherit;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .btn:hover { transform: translateY(-1px); }
-    .btn:active { transform: scale(0.98); }
-    .btn-primary { background: #1677ff; color: #fff; }
-    .btn-primary:hover { background: #4096ff; }
-    .btn-success { background: #52c41a; color: #fff; }
-    .btn-success:hover { background: #73d13d; }
-    .btn-default { background: #f0f0f0; color: #666; }
-    .btn-default:hover { background: #e0e0e0; }
-    .btn-danger { background: #ff4d4f; color: #fff; }
-    .btn-danger:hover { background: #ff7875; }
-    .btn-small { padding: 6px 12px; font-size: 12px; }
-
-    /* ===== 历史记录 ===== */
     .history-header {
       display: flex;
       justify-content: space-between;
@@ -629,21 +475,20 @@
       display: flex;
       align-items: center;
       padding: 8px 10px;
-      border-bottom: 1px solid #f5f5f5;
+      border-bottom: 1px solid var(--border-subtle);
       position: relative;
     }
-
     .rt-history-item:last-child { border-bottom: none; }
 
     .rt-history-title {
       font-size: 13px;
-      color: #333;
+      color: var(--text-primary);
       flex: 1;
     }
 
     .rt-history-detail {
       font-size: 12px;
-      color: #999;
+      color: var(--text-tertiary);
       margin-left: 8px;
       max-width: 200px;
       overflow: hidden;
@@ -653,13 +498,11 @@
 
     .rt-history-remove {
       position: absolute;
-      right: 4px;
-      top: 50%;
+      right: 4px; top: 50%;
       transform: translateY(-50%);
-      width: 18px;
-      height: 18px;
+      width: 18px; height: 18px;
       border-radius: 50%;
-      background: #ff4d4f;
+      background: var(--accent-9);
       color: #fff;
       border: none;
       font-size: 11px;
@@ -673,40 +516,13 @@
 
     .rt-empty {
       font-size: 13px;
-      color: #ccc;
+      color: var(--text-muted);
       text-align: center;
       padding: 10px;
       display: block;
     }
 
-    /* ===== Toast ===== */
-    .rt-toast {
-      position: fixed;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%) translateY(-20px);
-      padding: 10px 24px;
-      border-radius: 8px;
-      font-size: 14px;
-      color: #fff;
-      z-index: 100000;
-      opacity: 0;
-      transition: all 0.3s ease;
-      pointer-events: none;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    }
-
-    .rt-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-    .rt-toast.hide { opacity: 0; transform: translateX(-50%) translateY(-20px); }
-    .rt-toast-success { background: #52c41a; }
-    .rt-toast-error { background: #ff4d4f; }
-    .rt-toast-warning { background: #faad14; color: #333; }
-    .rt-toast-info { background: #1677ff; }
-
-    /* ===== 响应式 ===== */
     @media (max-width: 768px) {
-      .demo-title h1 { font-size: 24px; }
-      .card { padding: 16px; }
       .test-layout { grid-template-columns: 1fr; }
       .test-layout textarea { height: 150px; }
       .rt-highlight-box { height: 150px; }
@@ -717,22 +533,18 @@
       .flag-toggles { gap: 4px; }
       .rt-flag-label { font-size: 12px; padding: 3px 8px; }
     }
-
-    @media (max-width: 400px) {
-      body { padding: 12px; }
-      .card { padding: 12px; }
-      .demo-title h1 { font-size: 20px; }
-    }
   </style>
 </head>
 <body>
   <div class="container">
+    <div class="back-bar">
+      <a class="back-btn" href="../index.html">← 返回首页</a>
+    </div>
     <div class="demo-title">
       <h1>⏱️ 正则表达式测试工具</h1>
       <p>纯前端实现 · 实时匹配 · 捕获组展示 · 替换测试</p>
     </div>
 
-    <!-- ===== 模板选择 ===== -->
     <div class="card">
       <h2>📝 常用正则模板</h2>
       <div class="template-row">
@@ -740,7 +552,6 @@
       </div>
     </div>
 
-    <!-- ===== 常用正则查询 ===== -->
     <div class="card">
       <h2>🔍 常用正则查询</h2>
       <div class="rq-search-row">
@@ -759,7 +570,6 @@
       </div>
     </div>
 
-    <!-- ===== 正则输入 ===== -->
     <div class="card">
       <h2>🔤 正则表达式</h2>
       <div class="pattern-row">
@@ -771,7 +581,6 @@
       <div class="flag-toggles" id="flagToggles"></div>
     </div>
 
-    <!-- ===== 测试文本 ===== -->
     <div class="card">
       <h2>📄 测试文本</h2>
       <div class="test-layout">
@@ -791,7 +600,6 @@
         </div>
       </div>
 
-      <!-- 匹配结果 -->
       <div class="match-info">
         <div class="rt-match-count" id="matchCount">等待输入...</div>
       </div>
@@ -800,12 +608,11 @@
       </div>
     </div>
 
-    <!-- ===== 替换 ===== -->
     <div class="card">
       <h2>🔄 替换测试</h2>
       <div class="replace-area">
         <div class="replace-row">
-          <label style="font-size:13px;color:#666;white-space:nowrap;">替换为:</label>
+          <label style="font-size:13px;color:var(--text-tertiary);white-space:nowrap;">替换为:</label>
           <input type="text" id="replacementInput" placeholder="输入替换文本，如 ***" spellcheck="false">
           <button class="btn btn-primary" id="replaceBtn">🔄 替换</button>
         </div>
@@ -814,13 +621,11 @@
       </div>
     </div>
 
-    <!-- ===== 语法参考 ===== -->
     <div class="card">
       <button class="rt-syntax-toggle" id="syntaxToggle">📖 语法参考 (点击展开)</button>
       <div class="rt-syntax-content" id="syntaxContent"></div>
     </div>
 
-    <!-- ===== 历史记录 ===== -->
     <div class="card">
       <div class="history-header">
         <h2>📋 历史记录</h2>
@@ -832,7 +637,6 @@
     </div>
   </div>
 
-  <!-- ===== 引入模块（顺序重要） ===== -->
   <script src="./config.js"></script>
   <script src="./regex-engine.js"></script>
   <script src="./regex-query.js"></script>

@@ -3,108 +3,82 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>手写签名插件 - 演示</title>
+  <title>✍️ 手写签名插件 - 演示</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../theme.css">
   <link rel="stylesheet" href="./signature-pad.css">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-      min-height: 100vh;
-      padding: 20px;
-    }
-
-    .container { max-width: 900px; margin: 0 auto; }
-
-    .demo-title { text-align: center; margin-bottom: 30px; }
-    .demo-title h1 { font-size: 28px; color: #1a1a1a; margin-bottom: 8px; }
-    .demo-title p { color: #888; font-size: 14px; }
-
-    /* ===== Tab 切换 ===== */
+    /* ===== Tool-specific styles ===== */
     .tabs {
       display: flex; gap: 0; margin-bottom: 0;
-      background: #fff; border-radius: 12px 12px 0 0; overflow: hidden;
-      box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+      background: var(--bg-tab); border-radius: var(--radius-md) var(--radius-md) 0 0; overflow: hidden;
+      border: 1px solid var(--border-subtle);
+      border-bottom: none;
     }
 
     .tab-btn {
-      flex: 1; padding: 14px 20px; border: none; background: #f5f5f5;
+      flex: 1; padding: 14px 20px; border: none; background: transparent;
       font-size: 15px; font-weight: 600; cursor: pointer;
-      transition: all 0.2s; color: #666; font-family: inherit;
+      transition: var(--transition); color: var(--text-tertiary); font-family: var(--font-body);
       border-bottom: 3px solid transparent;
     }
 
-    .tab-btn:hover { background: #eee; }
-    .tab-btn.active { background: #fff; color: #1677ff; border-bottom-color: #1677ff; }
+    .tab-btn:hover { background: var(--bg-tab-hover); color: var(--text-secondary); }
+    .tab-btn.active { background: var(--bg-card); color: var(--accent-2); border-bottom-color: var(--accent-1); }
 
-    .tab-content { display: none; background: #fff; border-radius: 0 0 12px 12px; padding: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+    .tab-content { display: none; background: var(--bg-card); border-radius: 0 0 var(--radius-md) var(--radius-md); padding: 30px; border: 1px solid var(--border-subtle); border-top: none; }
     .tab-content.active { display: block; }
 
-    /* ===== 用法一：CanvasEngine ===== */
     .engine-section { margin-bottom: 20px; }
-    .engine-section label { display: block; font-size: 14px; font-weight: 600; color: #333; margin-bottom: 8px; }
+    .engine-section label { display: block; font-size: 14px; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; }
 
     #signatureCanvas {
       width: 100%; height: 250px;
-      border: 2px dashed #d9d9d9; border-radius: 8px;
-      cursor: crosshair; touch-action: none; background: #fff;
+      border: 2px dashed var(--border-input); border-radius: var(--radius-sm);
+      cursor: crosshair; touch-action: none; background: var(--bg-input);
     }
 
     .engine-actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
 
-    .engine-actions .btn {
-      padding: 10px 24px; border: none; border-radius: 8px;
-      font-size: 14px; font-weight: 600; cursor: pointer;
-      transition: all 0.2s; font-family: inherit;
-    }
-
-    .btn-primary { background: #1677ff; color: #fff; }
-    .btn-primary:hover { background: #4096ff; }
-    .btn-danger { background: #ff4d4f; color: #fff; }
-    .btn-danger:hover { background: #ff7875; }
-    .btn-default { background: #f0f0f0; color: #666; }
-    .btn-default:hover { background: #e0e0e0; }
-    .btn-success { background: #52c41a; color: #fff; }
-    .btn-success:hover { background: #73d13d; }
-
-    .engine-result { margin-top: 16px; padding: 16px; background: #fafafa; border-radius: 8px; display: none; }
+    .engine-result { margin-top: 16px; padding: 16px; background: var(--bg-input); border-radius: var(--radius-sm); display: none; border: 1px solid var(--border-subtle); }
     .engine-result.show { display: block; }
     .engine-result img { max-width: 100%; border-radius: 4px; }
-    .engine-result .base64-text { margin-top: 8px; font-size: 12px; color: #999; word-break: break-all; max-height: 60px; overflow-y: auto; font-family: monospace; }
+    .engine-result .base64-text { margin-top: 8px; font-size: 12px; color: var(--text-tertiary); word-break: break-all; max-height: 60px; overflow-y: auto; font-family: var(--font-mono); }
 
-    /* ===== 用法二：SignaturePad ===== */
     .pad-section { margin-bottom: 20px; }
 
     .pad-section input, .pad-section textarea {
-      width: 100%; padding: 10px 14px; border: 1px solid #d9d9d9;
-      border-radius: 8px; font-size: 14px; transition: border-color 0.2s; font-family: inherit;
+      width: 100%; padding: 10px 14px; border: 1px solid var(--border-input);
+      border-radius: var(--radius-sm); font-size: 14px; transition: var(--transition); font-family: var(--font-body);
+      background: var(--bg-input); color: var(--text-primary);
     }
 
     .pad-section input:focus, .pad-section textarea:focus {
-      outline: none; border-color: #1677ff; box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.1);
+      outline: none; border-color: var(--accent-1); box-shadow: 0 0 0 2px rgba(108,92,231,0.15);
     }
 
     .pad-section textarea { resize: vertical; min-height: 60px; }
 
     .pad-result { margin-top: 16px; display: none; }
     .pad-result.show { display: block; }
-    .pad-result img { max-width: 100%; border-radius: 8px; border: 1px solid #e8e8e8; padding: 8px; }
-    .pad-result .base64-preview { margin-top: 8px; padding: 10px; background: #f5f5f5; border-radius: 8px; font-size: 12px; color: #666; word-break: break-all; max-height: 80px; overflow-y: auto; font-family: monospace; }
+    .pad-result img { max-width: 100%; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); padding: 8px; }
+    .pad-result .base64-preview { margin-top: 8px; padding: 10px; background: var(--bg-input); border-radius: var(--radius-sm); font-size: 12px; color: var(--text-tertiary); word-break: break-all; max-height: 80px; overflow-y: auto; font-family: var(--font-mono); }
 
-    .upload-response { margin-top: 8px; padding: 10px; border-radius: 8px; font-size: 13px; }
-    .upload-response.success { background: #f6ffed; border: 1px solid #b7eb8f; color: #52c41a; }
-    .upload-response.error { background: #fff2f0; border: 1px solid #ffccc7; color: #ff4d4f; }
+    .upload-response { margin-top: 8px; padding: 10px; border-radius: var(--radius-sm); font-size: 13px; }
+    .upload-response.success { background: rgba(0,184,148,0.1); border: 1px solid rgba(0,184,148,0.3); color: var(--accent-8); }
+    .upload-response.error { background: rgba(214,48,49,0.1); border: 1px solid rgba(214,48,49,0.3); color: var(--accent-3); }
 
     .code-block {
-      background: #f5f5f5; border-radius: 8px; padding: 16px;
-      font-size: 13px; font-family: 'Courier New', monospace;
-      line-height: 1.6; overflow-x: auto; margin-top: 16px;
+      background: var(--bg-input); border-radius: var(--radius-sm); padding: 16px;
+      font-size: 13px; font-family: var(--font-mono);
+      line-height: 1.6; overflow-x: auto; margin-top: 16px; border: 1px solid var(--border-subtle);
     }
 
-    .code-block .comment { color: #999; }
-    .code-block .keyword { color: #1677ff; }
-    .code-block .string { color: #52c41a; }
+    .code-block .comment { color: var(--text-tertiary); }
+    .code-block .keyword { color: var(--accent-2); }
+    .code-block .string { color: var(--accent-8); }
 
     @media (max-width: 600px) {
       .tab-content { padding: 16px; }
@@ -114,6 +88,9 @@
 </head>
 <body>
   <div class="container">
+    <div class="back-bar">
+      <a class="back-btn" href="../index.html">← 返回首页</a>
+    </div>
     <div class="demo-title">
       <h1>✍️ 手写签名插件</h1>
       <p>CanvasEngine + SignaturePad · 原生无依赖 · 支持鼠标/手写笔 · 自动上传</p>
@@ -176,7 +153,7 @@
       </button>
 
       <div class="pad-result" id="padResult">
-        <h3 style="margin-bottom:12px;font-size:16px;">📄 签名结果</h3>
+        <h3 style="margin-bottom:12px;font-size:16px;color:var(--text-primary);">📄 签名结果</h3>
         <img id="padImage" alt="签名图片">
         <div class="base64-preview" id="padBase64"></div>
         <div class="upload-response" id="padUploadResponse"></div>

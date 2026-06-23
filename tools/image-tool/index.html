@@ -4,630 +4,315 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>🖼️ 图片压缩 & 格式转换</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../theme.css">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-      min-height: 100vh;
-      padding: 20px;
-    }
-
-    .container { max-width: 1000px; margin: 0 auto; }
-
-    .demo-title { text-align: center; margin-bottom: 30px; }
-    .demo-title h1 { font-size: 28px; color: #1a1a1a; margin-bottom: 8px; }
-    .demo-title p { color: #888; font-size: 14px; }
-
-    /* ===== 卡片 ===== */
-    .card {
-      background: #fff;
-      border-radius: 12px;
-      padding: 24px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-      margin-bottom: 20px;
-    }
-
-    .card h2 {
-      font-size: 16px;
-      color: #333;
-      margin-bottom: 16px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid #f0f0f0;
-    }
-
-    .card h3 {
-      font-size: 14px;
-      color: #555;
-      margin-bottom: 12px;
-    }
-
-    /* ===== 拖拽上传区域 ===== */
-    .drop-zone {
-      border: 2px dashed #d9d9d9;
-      border-radius: 12px;
-      padding: 50px 20px;
+    /* ===== Tool-specific styles ===== */
+    .it-dropzone {
+      border: 2px dashed var(--border-input);
+      border-radius: var(--radius-md);
+      padding: 40px 20px;
       text-align: center;
       cursor: pointer;
-      transition: all 0.3s;
-      background: #fafafa;
-    }
-
-    .drop-zone:hover,
-    .drop-zone.drag-over {
-      border-color: #1677ff;
-      background: rgba(22, 119, 255, 0.04);
-    }
-
-    .drop-zone-icon {
-      font-size: 48px;
-      margin-bottom: 12px;
-      display: block;
-    }
-
-    .drop-zone-text {
-      font-size: 16px;
-      color: #666;
-      margin-bottom: 8px;
-    }
-
-    .drop-zone-hint {
-      font-size: 13px;
-      color: #999;
-    }
-
-    .drop-zone-btn {
-      display: inline-block;
-      margin-top: 16px;
-      padding: 10px 28px;
-      background: #1677ff;
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-family: inherit;
-    }
-
-    .drop-zone-btn:hover {
-      background: #4096ff;
-      transform: translateY(-1px);
-    }
-
-    /* ===== 选项栏 ===== */
-    .options-bar {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      align-items: flex-end;
-    }
-
-    .options-bar .form-group {
-      flex: 1;
-      min-width: 140px;
-    }
-
-    .form-group {
-      margin-bottom: 14px;
-    }
-
-    .form-group label {
-      display: block;
-      font-size: 13px;
-      font-weight: 600;
-      color: #555;
-      margin-bottom: 6px;
-    }
-
-    .form-group select {
-      width: 100%;
-      padding: 8px 10px;
-      border: 1px solid #d9d9d9;
-      border-radius: 8px;
-      font-size: 13px;
-      transition: border-color 0.2s;
-      font-family: inherit;
-      background: #fff;
-    }
-
-    .form-group select:focus {
-      outline: none;
-      border-color: #1677ff;
-      box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.1);
-    }
-
-    /* ===== 按钮 ===== */
-    .btn {
-      padding: 10px 24px;
-      border: none;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-family: inherit;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      white-space: nowrap;
-    }
-
-    .btn:hover { transform: translateY(-1px); }
-    .btn:active { transform: scale(0.98); }
-    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-    .btn-primary { background: #1677ff; color: #fff; }
-    .btn-primary:hover:not(:disabled) { background: #4096ff; }
-    .btn-success { background: #52c41a; color: #fff; }
-    .btn-success:hover:not(:disabled) { background: #73d13d; }
-    .btn-default { background: #f0f0f0; color: #666; }
-    .btn-default:hover:not(:disabled) { background: #e0e0e0; }
-    .btn-danger { background: #ff4d4f; color: #fff; }
-    .btn-danger:hover:not(:disabled) { background: #ff7875; }
-    .btn-small { padding: 6px 12px; font-size: 12px; }
-
-    .action-bar {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-      flex-wrap: wrap;
-      margin-top: 16px;
-      padding-top: 16px;
-      border-top: 1px solid #f0f0f0;
-    }
-
-    /* ===== 图片列表 ===== */
-    .image-list-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-    }
-
-    .image-count {
-      font-size: 13px;
-      color: #999;
-    }
-
-    .image-list {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 12px;
-    }
-
-    .img-card {
-      background: #fafafa;
-      border: 1px solid #f0f0f0;
-      border-radius: 10px;
-      overflow: hidden;
+      transition: var(--transition);
+      background: var(--bg-input);
       position: relative;
-      transition: all 0.2s;
     }
 
-    .img-card:hover {
-      border-color: #d9d9d9;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    .it-dropzone:hover,
+    .it-dropzone.dragover {
+      border-color: var(--accent-1);
+      background: var(--bg-highlight);
     }
 
-    .img-card-preview {
-      width: 100%;
-      height: 140px;
-      overflow: hidden;
-      background: #f0f0f0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+    .it-dropzone-icon { font-size: 48px; display: block; margin-bottom: 12px; }
+    .it-dropzone-text { font-size: 15px; color: var(--text-secondary); margin-bottom: 8px; }
+    .it-dropzone-hint { font-size: 12px; color: var(--text-muted); }
 
-    .img-card-preview img {
-      max-width: 100%;
-      max-height: 100%;
-      object-fit: contain;
-    }
-
-    .img-card-info {
-      padding: 10px;
-    }
-
-    .img-card-name {
-      font-size: 12px;
-      color: #333;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      margin-bottom: 4px;
-    }
-
-    .img-card-dims {
-      font-size: 11px;
-      color: #999;
-    }
-
-    .img-card-size {
-      font-size: 11px;
-      color: #999;
-    }
-
-    .img-card-remove {
+    .it-dropzone input[type="file"] {
       position: absolute;
-      top: 6px;
-      right: 6px;
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      background: rgba(0,0,0,0.5);
-      color: #fff;
-      border: none;
-      font-size: 14px;
-      cursor: pointer;
-      display: none;
-      line-height: 22px;
-      text-align: center;
-    }
-
-    .img-card:hover .img-card-remove { display: block; }
-
-    .img-card-status {
-      padding: 4px 10px;
-      font-size: 11px;
-      color: #999;
-      text-align: center;
-      background: #f5f5f5;
-    }
-
-    .img-card-status.status-done {
-      color: #52c41a;
-      background: #f6ffed;
-    }
-
-    .img-card-status.status-error {
-      color: #ff4d4f;
-      background: #fff2f0;
-    }
-
-    /* ===== 结果区域 ===== */
-    .results-container {
-      display: none;
-    }
-
-    .results-stats {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-      margin-bottom: 20px;
-    }
-
-    .stat-card {
-      background: #fafafa;
-      border: 1px solid #f0f0f0;
-      border-radius: 10px;
-      padding: 16px;
-      text-align: center;
-    }
-
-    .stat-label {
-      font-size: 12px;
-      color: #999;
-      margin-bottom: 6px;
-    }
-
-    .stat-value {
-      font-size: 20px;
-      font-weight: 700;
-      color: #333;
-    }
-
-    .saving-positive { color: #52c41a; }
-    .saving-negative { color: #ff4d4f; }
-
-    .results-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 16px;
-    }
-
-    .result-item {
-      background: #fafafa;
-      border: 1px solid #f0f0f0;
-      border-radius: 10px;
-      overflow: hidden;
-    }
-
-    .result-compare {
-      display: flex;
-      align-items: center;
-      justify-content: space-around;
-      padding: 12px;
-      background: #fff;
-      border-bottom: 1px solid #f0f0f0;
-    }
-
-    .result-original,
-    .result-processed {
-      text-align: center;
-    }
-
-    .result-arrow {
-      font-size: 20px;
-      color: #1677ff;
-      font-weight: 700;
-    }
-
-    .result-label {
-      font-size: 11px;
-      color: #999;
-      margin-bottom: 2px;
-    }
-
-    .result-size {
-      font-size: 14px;
-      font-weight: 600;
-      color: #333;
-    }
-
-    .result-preview {
-      width: 100%;
-      height: 160px;
-      overflow: hidden;
-      background: #f0f0f0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .result-preview img {
-      max-width: 100%;
-      max-height: 100%;
-      object-fit: contain;
-    }
-
-    .result-details {
-      padding: 10px 12px;
-    }
-
-    .result-detail-row {
-      display: flex;
-      justify-content: space-between;
-      font-size: 12px;
-      padding: 3px 0;
-      color: #666;
-    }
-
-    .result-detail-row span:first-child {
-      color: #999;
-    }
-
-    .result-actions {
-      display: flex;
-      gap: 8px;
-      padding: 10px 12px;
-      border-top: 1px solid #f0f0f0;
-    }
-
-    /* ===== 历史记录 ===== */
-    .history-section {
-      margin-top: 20px;
-      padding-top: 16px;
-      border-top: 1px solid #f0f0f0;
-    }
-
-    .history-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-    }
-
-    .history-header h3 {
-      font-size: 14px;
-      color: #555;
-      margin-bottom: 0;
-    }
-
-    .history-list {
-      max-height: 200px;
-      overflow-y: auto;
-    }
-
-    .history-item {
-      display: flex;
-      align-items: center;
-      padding: 8px 10px;
-      border-bottom: 1px solid #f5f5f5;
-      position: relative;
-      cursor: default;
-    }
-
-    .history-item:last-child { border-bottom: none; }
-
-    .history-title {
-      font-size: 13px;
-      color: #333;
-      flex: 1;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .history-detail {
-      font-size: 12px;
-      color: #999;
-      margin-left: 8px;
-      white-space: nowrap;
-      max-width: 200px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .remove-history {
-      position: absolute;
-      right: 4px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      background: #ff4d4f;
-      color: #fff;
-      border: none;
-      font-size: 11px;
-      cursor: pointer;
-      display: none;
-      line-height: 18px;
-      text-align: center;
-    }
-
-    .history-item:hover .remove-history { display: block; }
-
-    .history-empty {
-      font-size: 13px;
-      color: #ccc;
-      text-align: center;
-      padding: 10px;
-      display: block;
-    }
-
-    /* ===== Toast ===== */
-    .img-toast {
-      position: fixed;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%) translateY(-20px);
-      padding: 10px 24px;
-      border-radius: 8px;
-      font-size: 14px;
-      color: #fff;
-      z-index: 100000;
+      top: 0; left: 0; width: 100%; height: 100%;
       opacity: 0;
-      transition: all 0.3s ease;
-      pointer-events: none;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      cursor: pointer;
     }
 
-    .img-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-    .img-toast.hide { opacity: 0; transform: translateX(-50%) translateY(-20px); }
-    .img-toast-success { background: #52c41a; }
-    .img-toast-error { background: #ff4d4f; }
-    .img-toast-warning { background: #faad14; color: #333; }
-    .img-toast-info { background: #1677ff; }
+    .it-preview-area {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 16px;
+    }
 
-    /* ===== 响应式 ===== */
+    .it-preview-box {
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+    }
+
+    .it-preview-header {
+      padding: 8px 12px;
+      background: var(--bg-tab-hover);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .it-preview-body {
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 200px;
+      background: var(--bg-input);
+    }
+
+    .it-preview-body img {
+      max-width: 100%;
+      max-height: 300px;
+      object-fit: contain;
+      border-radius: 4px;
+    }
+
+    .it-preview-info {
+      padding: 8px 12px;
+      font-size: 12px;
+      color: var(--text-tertiary);
+      border-top: 1px solid var(--border-subtle);
+      line-height: 1.6;
+    }
+
+    .it-preview-info span { display: block; }
+
+    .it-controls {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-top: 16px;
+    }
+
+    .it-controls label {
+      font-size: 13px;
+      color: var(--text-tertiary);
+      white-space: nowrap;
+    }
+
+    .it-controls select,
+    .it-controls input[type="range"] {
+      padding: 6px 10px;
+      border: 1px solid var(--border-input);
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: var(--font-body);
+      background: var(--bg-input);
+      color: var(--text-primary);
+    }
+
+    .it-controls select:focus { outline: none; border-color: var(--accent-1); }
+
+    .it-quality-value {
+      font-size: 13px;
+      color: var(--accent-2);
+      font-weight: 600;
+      min-width: 30px;
+      text-align: center;
+    }
+
+    .it-batch-list {
+      margin-top: 12px;
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+    }
+
+    .it-batch-item {
+      display: flex;
+      align-items: center;
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border-subtle);
+      gap: 12px;
+    }
+    .it-batch-item:last-child { border-bottom: none; }
+
+    .it-batch-thumb {
+      width: 40px; height: 40px;
+      border-radius: 4px;
+      object-fit: cover;
+      background: var(--bg-input);
+    }
+
+    .it-batch-name {
+      flex: 1;
+      font-size: 13px;
+      color: var(--text-primary);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .it-batch-size {
+      font-size: 12px;
+      color: var(--text-tertiary);
+      white-space: nowrap;
+    }
+
+    .it-batch-status {
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .it-batch-status.done { color: var(--accent-8); }
+    .it-batch-status.processing { color: var(--accent-5); }
+    .it-batch-status.error { color: var(--accent-3); }
+
+    .it-batch-remove {
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      background: var(--accent-9);
+      color: #fff;
+      border: none;
+      font-size: 11px;
+      cursor: pointer;
+      line-height: 20px;
+      text-align: center;
+      display: none;
+    }
+
+    .it-batch-item:hover .it-batch-remove { display: block; }
+
+    .it-progress-bar {
+      height: 4px;
+      background: var(--border-subtle);
+      border-radius: 2px;
+      margin-top: 8px;
+      overflow: hidden;
+    }
+
+    .it-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-1), var(--accent-2));
+      border-radius: 2px;
+      transition: width 0.3s ease;
+      width: 0%;
+    }
+
+    .it-progress-text {
+      font-size: 12px;
+      color: var(--text-tertiary);
+      margin-top: 4px;
+      text-align: center;
+    }
+
+    .it-empty {
+      text-align: center;
+      padding: 20px;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .it-empty-icon { font-size: 32px; display: block; margin-bottom: 8px; }
+
     @media (max-width: 768px) {
-      .demo-title h1 { font-size: 24px; }
-      .card { padding: 16px; }
-      .options-bar { flex-direction: column; }
-      .options-bar .form-group { min-width: auto; }
-      .results-stats { grid-template-columns: 1fr; }
-      .results-grid { grid-template-columns: 1fr; }
-      .image-list { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
-      .drop-zone { padding: 30px 16px; }
-      .action-bar { flex-direction: column; align-items: stretch; }
-    }
-
-    @media (max-width: 400px) {
-      body { padding: 12px; }
-      .card { padding: 12px; }
-      .image-list { grid-template-columns: 1fr 1fr; }
+      .it-preview-area { grid-template-columns: 1fr; }
+      .it-controls { flex-direction: column; align-items: stretch; }
+      .it-controls select { width: 100%; }
     }
   </style>
 </head>
 <body>
   <div class="container">
+    <div class="back-bar">
+      <a class="back-btn" href="../index.html">← 返回首页</a>
+    </div>
     <div class="demo-title">
       <h1>🖼️ 图片压缩 & 格式转换</h1>
-      <p>纯前端实现 · 支持 PNG/JPEG/WebP/BMP · 批量处理</p>
+      <p>纯前端实现 · 拖拽上传 · 批量处理 · 格式互转</p>
     </div>
 
-    <!-- ===== 上传区域 ===== -->
     <div class="card">
       <h2>📤 上传图片</h2>
-      <div class="drop-zone" id="dropZone">
-        <span class="drop-zone-icon">📁</span>
-        <div class="drop-zone-text">拖拽图片到此处，或点击按钮选择</div>
-        <div class="drop-zone-hint">支持 PNG、JPEG、WebP、BMP、GIF 格式，单文件最大 20MB</div>
-        <button class="drop-zone-btn" id="uploadBtn">选择图片</button>
-        <input type="file" id="fileInput" accept="image/*" multiple style="display:none">
+      <div class="it-dropzone" id="dropzone">
+        <span class="it-dropzone-icon">📁</span>
+        <div class="it-dropzone-text">拖拽图片到此处，或点击选择文件</div>
+        <div class="it-dropzone-hint">支持 PNG / JPEG / WebP / BMP / GIF</div>
+        <input type="file" id="fileInput" accept="image/*" multiple>
       </div>
     </div>
 
-    <!-- ===== 选项 ===== -->
     <div class="card">
       <h2>⚙️ 处理选项</h2>
-      <div class="options-bar">
-        <div class="form-group">
-          <label for="qualityRange">质量</label>
-          <select id="qualityRange"></select>
-        </div>
-        <div class="form-group">
-          <label for="formatSelect">输出格式</label>
-          <select id="formatSelect"></select>
-        </div>
-        <div class="form-group">
-          <label for="maxWidthSelect">最大宽度</label>
-          <select id="maxWidthSelect"></select>
-        </div>
-        <div class="form-group">
-          <label for="maxHeightSelect">最大高度</label>
-          <select id="maxHeightSelect"></select>
-        </div>
+      <div class="it-controls">
+        <label>输出格式:</label>
+        <select id="formatSelect"></select>
+        <label>质量:</label>
+        <input type="range" id="qualitySlider" min="1" max="100" value="80">
+        <span class="it-quality-value" id="qualityValue">80%</span>
+        <label>最大宽度:</label>
+        <select id="maxWidthSelect"></select>
+        <button class="btn btn-primary" id="processBtn">⚡ 处理</button>
+        <button class="btn btn-success" id="downloadAllBtn">📦 全部下载</button>
+        <button class="btn btn-default" id="clearAllBtn">🔄 清空</button>
       </div>
     </div>
 
-    <!-- ===== 图片列表 ===== -->
     <div class="card">
-      <div class="image-list-header">
-        <h2>🖼️ 图片列表</h2>
-        <span class="image-count" id="imageCount">0 张图片</span>
-      </div>
-      <div class="image-list" id="imageList">
-        <!-- 由 JS 动态生成 -->
-      </div>
-      <div class="action-bar">
-        <button class="btn btn-primary" id="processAllBtn" disabled>🚀 全部处理</button>
-        <button class="btn btn-default" id="clearAllBtn" disabled>🗑️ 清空所有</button>
+      <h2>🖼️ 预览</h2>
+      <div class="it-preview-area" id="previewArea">
+        <div class="it-preview-box">
+          <div class="it-preview-header">
+            <span>原始图片</span>
+            <span id="originalCount">0 张</span>
+          </div>
+          <div class="it-preview-body" id="originalPreview">
+            <span class="it-empty">
+              <span class="it-empty-icon">📷</span>
+              请上传图片
+            </span>
+          </div>
+          <div class="it-preview-info" id="originalInfo">
+            <span>请上传图片查看信息</span>
+          </div>
+        </div>
+        <div class="it-preview-box">
+          <div class="it-preview-header">
+            <span>处理后图片</span>
+            <span id="processedCount">0 张</span>
+          </div>
+          <div class="it-preview-body" id="processedPreview">
+            <span class="it-empty">
+              <span class="it-empty-icon">⚙️</span>
+              点击"处理"查看结果
+            </span>
+          </div>
+          <div class="it-preview-info" id="processedInfo">
+            <span>点击"处理"查看结果</span>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- ===== 结果 ===== -->
-    <div class="card results-container" id="resultsContainer">
-      <h2>📊 处理结果</h2>
-      <div class="results-stats">
-        <div class="stat-card">
-          <div class="stat-label">原始大小</div>
-          <div class="stat-value" id="totalOriginalSize">0 B</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">处理后大小</div>
-          <div class="stat-value" id="totalOutputSize">0 B</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">节省空间</div>
-          <div class="stat-value" id="totalSavings">0 B</div>
-        </div>
-      </div>
-      <div class="results-grid" id="resultsGrid">
-        <!-- 由 JS 动态生成 -->
-      </div>
-      <div class="action-bar">
-        <button class="btn btn-success" id="downloadAllBtn" disabled>⬇ 全部下载</button>
-      </div>
-    </div>
-
-    <!-- ===== 历史记录 ===== -->
     <div class="card">
-      <div class="history-header">
-        <h3>📋 历史记录</h3>
-        <button class="btn btn-small btn-danger" id="clearHistoryBtn">🗑️ 清空</button>
+      <h2>📋 批量处理列表</h2>
+      <div class="it-batch-list" id="batchList">
+        <div class="it-empty">
+          <span class="it-empty-icon">📋</span>
+          暂无文件
+        </div>
       </div>
-      <div class="history-list" id="historyList">
-        <span class="history-empty">暂无记录</span>
+      <div class="it-progress-bar" id="progressBar" style="display:none;">
+        <div class="it-progress-fill" id="progressFill"></div>
       </div>
+      <div class="it-progress-text" id="progressText"></div>
     </div>
   </div>
 
-  <!-- ===== 引入模块（顺序重要） ===== -->
   <script src="./config.js"></script>
   <script src="./image-engine.js"></script>
   <script src="./app.js"></script>

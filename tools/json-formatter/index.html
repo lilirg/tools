@@ -4,82 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>🔄 JSON 格式化 & 对比</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../theme.css">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-      min-height: 100vh;
-      padding: 20px;
-    }
-
-    .container { max-width: 1000px; margin: 0 auto; }
-
-    .demo-title { text-align: center; margin-bottom: 30px; }
-    .demo-title h1 { font-size: 28px; color: #1a1a1a; margin-bottom: 8px; }
-    .demo-title p { color: #888; font-size: 14px; }
-
-    /* ===== Tab 导航 ===== */
-    .jf-tabs {
-      display: flex;
-      gap: 4px;
-      margin-bottom: 20px;
-      background: #fff;
-      border-radius: 12px;
-      padding: 6px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-    }
-
-    .jf-tab-btn {
-      flex: 1;
-      padding: 10px 16px;
-      border: none;
-      background: transparent;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 500;
-      color: #666;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-family: inherit;
-    }
-
-    .jf-tab-btn:hover { color: #1677ff; background: rgba(22, 119, 255, 0.04); }
-    .jf-tab-btn.active {
-      color: #1677ff;
-      background: rgba(22, 119, 255, 0.1);
-      font-weight: 600;
-      box-shadow: 0 2px 6px rgba(22, 119, 255, 0.15);
-    }
-
-    .jf-tab-content { display: none; }
-    .jf-tab-content.active { display: block; }
-
-    /* ===== 卡片 ===== */
-    .card {
-      background: #fff;
-      border-radius: 12px;
-      padding: 24px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-      margin-bottom: 20px;
-    }
-
-    .card h2 {
-      font-size: 16px;
-      color: #333;
-      margin-bottom: 16px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid #f0f0f0;
-    }
-
-    .card h3 {
-      font-size: 14px;
-      color: #555;
-      margin-bottom: 12px;
-    }
-
-    /* ===== 格式化布局 ===== */
+    /* ===== Tool-specific styles ===== */
     .format-layout {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -90,19 +20,21 @@
       width: 100%;
       height: 300px;
       padding: 12px;
-      border: 1px solid #d9d9d9;
-      border-radius: 8px;
+      border: 1px solid var(--border-input);
+      border-radius: var(--radius-sm);
       font-size: 13px;
-      font-family: 'Courier New', monospace;
+      font-family: var(--font-mono);
       resize: vertical;
       line-height: 1.5;
       tab-size: 2;
+      background: var(--bg-input);
+      color: var(--text-primary);
     }
 
     .format-layout textarea:focus {
       outline: none;
-      border-color: #1677ff;
-      box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.1);
+      border-color: var(--accent-1);
+      box-shadow: 0 0 0 2px rgba(108,92,231,0.15);
     }
 
     .jf-output {
@@ -110,73 +42,41 @@
       min-height: 300px;
       max-height: 500px;
       padding: 12px;
-      border: 1px solid #d9d9d9;
-      border-radius: 8px;
+      border: 1px solid var(--border-input);
+      border-radius: var(--radius-sm);
       font-size: 13px;
-      font-family: 'Courier New', monospace;
+      font-family: var(--font-mono);
       line-height: 1.5;
       overflow: auto;
-      background: #fafafa;
+      background: var(--bg-input);
       white-space: pre-wrap;
       word-break: break-all;
+      color: var(--text-primary);
     }
 
     .jf-output-code { white-space: pre-wrap; }
-    .jf-output-tree { white-space: normal; font-family: inherit; }
+    .jf-output-tree { white-space: normal; font-family: var(--font-body); }
 
-    /* ===== 语法高亮 ===== */
-    .jf-key { color: #881391; }
-    .jf-string { color: #0B7500; }
-    .jf-number { color: #1750EB; }
-    .jf-boolean { color: #1750EB; }
-    .jf-null { color: #808080; }
-    .jf-bracket { color: #333; }
-    .jf-count { color: #999; font-size: 12px; margin-left: 4px; }
-    .jf-index { color: #999; font-size: 12px; }
+    .jf-key { color: var(--accent-3); }
+    .jf-string { color: var(--accent-8); }
+    .jf-number { color: var(--accent-7); }
+    .jf-boolean { color: var(--accent-7); }
+    .jf-null { color: var(--text-tertiary); }
+    .jf-bracket { color: var(--text-primary); }
+    .jf-count { color: var(--text-tertiary); font-size: 12px; margin-left: 4px; }
+    .jf-index { color: var(--text-tertiary); font-size: 12px; }
 
-    /* ===== 树形视图 ===== */
     .jf-tree-branch { margin: 2px 0; }
     .jf-tree-summary { cursor: pointer; padding: 2px 0; }
-    .jf-tree-summary:hover { background: #f0f0f0; }
+    .jf-tree-summary:hover { background: var(--bg-tab-hover); }
     .jf-tree-children { padding-left: 20px; }
     .jf-tree-item { padding: 1px 0; }
     .jf-tree-leaf { margin: 2px 0; }
 
-    /* ===== 操作栏 ===== */
-    .action-bar {
-      display: flex;
-      gap: 8px;
-      margin-top: 12px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-
-    .action-bar select,
-    .action-bar input {
-      padding: 6px 10px;
-      border: 1px solid #d9d9d9;
-      border-radius: 6px;
-      font-size: 13px;
-      font-family: inherit;
-      background: #fff;
-    }
-
-    .action-bar select:focus,
-    .action-bar input:focus {
-      outline: none;
-      border-color: #1677ff;
-    }
-
-    .action-bar label {
-      font-size: 13px;
-      color: #666;
-    }
-
-    /* ===== 查询区域 ===== */
     .query-area {
       margin-top: 12px;
       padding-top: 12px;
-      border-top: 1px solid #f0f0f0;
+      border-top: 1px solid var(--border-subtle);
     }
 
     .query-row {
@@ -188,42 +88,28 @@
     .query-row input {
       flex: 1;
       padding: 8px 10px;
-      border: 1px solid #d9d9d9;
+      border: 1px solid var(--border-input);
       border-radius: 6px;
       font-size: 13px;
-      font-family: 'Courier New', monospace;
+      font-family: var(--font-mono);
+      background: var(--bg-input);
+      color: var(--text-primary);
     }
 
-    .query-row input:focus {
-      outline: none;
-      border-color: #1677ff;
-    }
+    .query-row input:focus { outline: none; border-color: var(--accent-1); }
 
     .jf-query-value {
       margin-top: 8px;
       padding: 10px;
-      background: #f8f9fa;
+      background: var(--bg-input);
       border-radius: 6px;
       font-size: 13px;
       line-height: 1.5;
       overflow: auto;
       max-height: 200px;
+      color: var(--text-primary);
     }
 
-    /* ===== 错误显示 ===== */
-    .jf-error {
-      display: none;
-      margin-top: 8px;
-      padding: 10px 14px;
-      background: #fff2f0;
-      border: 1px solid #ffccc7;
-      border-radius: 6px;
-      color: #ff4d4f;
-      font-size: 13px;
-      font-family: 'Courier New', monospace;
-    }
-
-    /* ===== 对比布局 ===== */
     .diff-layout {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -234,18 +120,17 @@
       width: 100%;
       height: 250px;
       padding: 12px;
-      border: 1px solid #d9d9d9;
-      border-radius: 8px;
+      border: 1px solid var(--border-input);
+      border-radius: var(--radius-sm);
       font-size: 13px;
-      font-family: 'Courier New', monospace;
+      font-family: var(--font-mono);
       resize: vertical;
       line-height: 1.5;
+      background: var(--bg-input);
+      color: var(--text-primary);
     }
 
-    .diff-layout textarea:focus {
-      outline: none;
-      border-color: #1677ff;
-    }
+    .diff-layout textarea:focus { outline: none; border-color: var(--accent-1); }
 
     .diff-actions {
       display: flex;
@@ -257,36 +142,35 @@
 
     .diff-actions select {
       padding: 6px 10px;
-      border: 1px solid #d9d9d9;
+      border: 1px solid var(--border-input);
       border-radius: 6px;
       font-size: 13px;
-      font-family: inherit;
-      background: #fff;
+      font-family: var(--font-body);
+      background: var(--bg-input);
+      color: var(--text-primary);
     }
 
-    /* ===== 差异结果 ===== */
     .jf-diff-list { font-size: 13px; }
     .jf-diff-header { margin-bottom: 8px; }
-    .jf-diff-stat { font-weight: 600; color: #333; }
+    .jf-diff-stat { font-weight: 600; color: var(--text-primary); }
     .jf-diff-item {
       padding: 8px 10px;
       margin-bottom: 4px;
       border-radius: 6px;
       border-left: 3px solid transparent;
     }
-    .jf-diff-added { background: #f6ffed; border-left-color: #52c41a; }
-    .jf-diff-removed { background: #fff2f0; border-left-color: #ff4d4f; }
-    .jf-diff-modified { background: #fffbe6; border-left-color: #faad14; }
-    .jf-diff-path { font-weight: 600; color: #333; font-family: 'Courier New', monospace; font-size: 12px; }
-    .jf-diff-type { font-size: 11px; color: #999; margin: 2px 0; }
-    .jf-diff-value { font-family: 'Courier New', monospace; font-size: 12px; padding: 2px 0; }
-    .jf-diff-value.added { color: #52c41a; }
-    .jf-diff-value.removed { color: #ff4d4f; }
-    .jf-diff-undefined { color: #999; font-style: italic; }
-    .jf-diff-object { color: #333; white-space: pre-wrap; }
-    .jf-diff-nochange { padding: 20px; text-align: center; color: #52c41a; font-size: 16px; }
+    .jf-diff-added { background: rgba(0,184,148,0.1); border-left-color: var(--accent-8); }
+    .jf-diff-removed { background: rgba(214,48,49,0.1); border-left-color: var(--accent-9); }
+    .jf-diff-modified { background: rgba(253,203,110,0.1); border-left-color: var(--accent-5); }
+    .jf-diff-path { font-weight: 600; color: var(--text-primary); font-family: var(--font-mono); font-size: 12px; }
+    .jf-diff-type { font-size: 11px; color: var(--text-tertiary); margin: 2px 0; }
+    .jf-diff-value { font-family: var(--font-mono); font-size: 12px; padding: 2px 0; }
+    .jf-diff-value.added { color: var(--accent-8); }
+    .jf-diff-value.removed { color: var(--accent-3); }
+    .jf-diff-undefined { color: var(--text-tertiary); font-style: italic; }
+    .jf-diff-object { color: var(--text-primary); white-space: pre-wrap; }
+    .jf-diff-nochange { padding: 20px; text-align: center; color: var(--accent-8); font-size: 16px; }
 
-    /* ===== 并排对比 ===== */
     .jf-diff-side { font-size: 13px; }
     .jf-diff-side-header { margin-bottom: 8px; }
     .jf-diff-side-row {
@@ -298,52 +182,22 @@
       border-radius: 4px;
       align-items: center;
     }
-    .jf-diff-side-row.jf-diff-added { background: #f6ffed; }
-    .jf-diff-side-row.jf-diff-removed { background: #fff2f0; }
-    .jf-diff-side-row.jf-diff-modified { background: #fffbe6; }
-    .jf-diff-side-path { font-family: 'Courier New', monospace; font-size: 12px; font-weight: 600; }
-    .jf-diff-side-type { font-size: 11px; color: #999; text-align: center; }
+    .jf-diff-side-row.jf-diff-added { background: rgba(0,184,148,0.1); }
+    .jf-diff-side-row.jf-diff-removed { background: rgba(214,48,49,0.1); }
+    .jf-diff-side-row.jf-diff-modified { background: rgba(253,203,110,0.1); }
+    .jf-diff-side-path { font-family: var(--font-mono); font-size: 12px; font-weight: 600; }
+    .jf-diff-side-type { font-size: 11px; color: var(--text-tertiary); text-align: center; }
     .jf-diff-side-old, .jf-diff-side-new {
-      font-family: 'Courier New', monospace;
+      font-family: var(--font-mono);
       font-size: 12px;
       padding: 2px 6px;
       border-radius: 3px;
       overflow: hidden;
       text-overflow: ellipsis;
     }
-    .jf-diff-side-old { background: rgba(255,77,79,0.1); }
-    .jf-diff-side-new { background: rgba(82,196,26,0.1); }
+    .jf-diff-side-old { background: rgba(214,48,49,0.15); }
+    .jf-diff-side-new { background: rgba(0,184,148,0.15); }
 
-    /* ===== 按钮 ===== */
-    .btn {
-      padding: 8px 20px;
-      border: none;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-family: inherit;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .btn:hover { transform: translateY(-1px); }
-    .btn:active { transform: scale(0.98); }
-    .btn-primary { background: #1677ff; color: #fff; }
-    .btn-primary:hover { background: #4096ff; }
-    .btn-success { background: #52c41a; color: #fff; }
-    .btn-success:hover { background: #73d13d; }
-    .btn-default { background: #f0f0f0; color: #666; }
-    .btn-default:hover { background: #e0e0e0; }
-    .btn-danger { background: #ff4d4f; color: #fff; }
-    .btn-danger:hover { background: #ff7875; }
-    .btn-warning { background: #faad14; color: #fff; }
-    .btn-warning:hover { background: #ffc53d; }
-    .btn-small { padding: 6px 12px; font-size: 12px; }
-
-    /* ===== 历史记录 ===== */
     .history-header {
       display: flex;
       justify-content: space-between;
@@ -355,21 +209,20 @@
       display: flex;
       align-items: center;
       padding: 8px 10px;
-      border-bottom: 1px solid #f5f5f5;
+      border-bottom: 1px solid var(--border-subtle);
       position: relative;
     }
-
     .jf-history-item:last-child { border-bottom: none; }
 
     .jf-history-title {
       font-size: 13px;
-      color: #333;
+      color: var(--text-primary);
       flex: 1;
     }
 
     .jf-history-detail {
       font-size: 12px;
-      color: #999;
+      color: var(--text-tertiary);
       margin-left: 8px;
       max-width: 200px;
       overflow: hidden;
@@ -379,13 +232,11 @@
 
     .jf-history-remove {
       position: absolute;
-      right: 4px;
-      top: 50%;
+      right: 4px; top: 50%;
       transform: translateY(-50%);
-      width: 18px;
-      height: 18px;
+      width: 18px; height: 18px;
       border-radius: 50%;
-      background: #ff4d4f;
+      background: var(--accent-9);
       color: #fff;
       border: none;
       font-size: 11px;
@@ -399,72 +250,42 @@
 
     .jf-empty {
       font-size: 13px;
-      color: #ccc;
+      color: var(--text-muted);
       text-align: center;
       padding: 10px;
       display: block;
     }
 
-    /* ===== Toast ===== */
-    .jf-toast {
-      position: fixed;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%) translateY(-20px);
-      padding: 10px 24px;
-      border-radius: 8px;
-      font-size: 14px;
-      color: #fff;
-      z-index: 100000;
-      opacity: 0;
-      transition: all 0.3s ease;
-      pointer-events: none;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    }
-
-    .jf-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-    .jf-toast.hide { opacity: 0; transform: translateX(-50%) translateY(-20px); }
-    .jf-toast-success { background: #52c41a; }
-    .jf-toast-error { background: #ff4d4f; }
-    .jf-toast-warning { background: #faad14; color: #333; }
-    .jf-toast-info { background: #1677ff; }
-
-    /* ===== 响应式 ===== */
     @media (max-width: 768px) {
-      .demo-title h1 { font-size: 24px; }
-      .card { padding: 16px; }
       .format-layout { grid-template-columns: 1fr; }
       .format-layout textarea { height: 200px; }
       .jf-output { min-height: 200px; }
       .diff-layout { grid-template-columns: 1fr; }
       .diff-layout textarea { height: 150px; }
       .jf-diff-side-row { grid-template-columns: 1fr 40px 1fr; }
-      .jf-tab-btn { font-size: 13px; padding: 8px 12px; }
-      .action-bar { flex-direction: column; align-items: stretch; }
-      .diff-actions { flex-direction: column; align-items: stretch; }
     }
 
     @media (max-width: 400px) {
-      body { padding: 12px; }
-      .card { padding: 12px; }
-      .demo-title h1 { font-size: 20px; }
+      .jf-output { min-height: 150px; }
     }
   </style>
 </head>
 <body>
   <div class="container">
+    <div class="back-bar">
+      <a class="back-btn" href="../index.html">← 返回首页</a>
+    </div>
     <div class="demo-title">
       <h1>🔄 JSON 格式化 & 对比</h1>
       <p>纯前端实现 · 语法高亮 · 差异对比 · 路径查询</p>
     </div>
 
-    <!-- ===== Tab 导航 ===== -->
     <div class="jf-tabs">
       <button class="jf-tab-btn active">🔧 格式化</button>
       <button class="jf-tab-btn">🔍 对比</button>
     </div>
 
-    <!-- ===== Tab 1: 格式化 ===== -->
+    <!-- Tab 1: 格式化 -->
     <div class="jf-tab-content active">
       <div class="card">
         <h2>🔧 JSON 格式化 / 压缩 / 校验</h2>
@@ -476,7 +297,7 @@
           <div>
             <h3>输出结果</h3>
             <div class="jf-output" id="outputJSON">
-              <span style="color:#ccc;">点击"格式化"或"压缩"查看结果</span>
+              <span style="color:var(--text-muted);">点击"格式化"或"压缩"查看结果</span>
             </div>
           </div>
         </div>
@@ -487,17 +308,14 @@
           <button class="btn btn-default" id="validateBtn">✅ 校验</button>
           <button class="btn btn-success" id="copyBtn">📋 复制</button>
           <button class="btn btn-default" id="clearBtn">🔄 清空</button>
-
           <label>缩进:</label>
           <select id="indentSelect"></select>
-
           <label>视图:</label>
           <select id="viewModeSelect"></select>
         </div>
 
-        <div class="jf-error" id="errorDisplay"></div>
+        <div class="error-display" id="errorDisplay"></div>
 
-        <!-- 路径查询 -->
         <div class="query-area">
           <h3>🔍 JSON 路径查询</h3>
           <div class="query-row">
@@ -508,19 +326,16 @@
         </div>
       </div>
 
-      <!-- 历史记录 -->
       <div class="card">
         <div class="history-header">
           <h2>📋 历史记录</h2>
           <button class="btn btn-small btn-danger" id="clearHistoryBtn">🗑️ 清空</button>
         </div>
-        <div id="historyList">
-          <span class="jf-empty">暂无记录</span>
-        </div>
+        <div id="historyList"><span class="jf-empty">暂无记录</span></div>
       </div>
     </div>
 
-    <!-- ===== Tab 2: 对比 ===== -->
+    <!-- Tab 2: 对比 -->
     <div class="jf-tab-content">
       <div class="card">
         <h2>🔍 JSON 差异对比</h2>
@@ -542,13 +357,12 @@
         </div>
 
         <div class="jf-diff-list" id="diffResult" style="margin-top:16px;">
-          <span style="color:#ccc;">点击"对比"查看差异</span>
+          <span style="color:var(--text-muted);">点击"对比"查看差异</span>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ===== 引入模块（顺序重要） ===== -->
   <script src="./config.js"></script>
   <script src="./json-engine.js"></script>
   <script src="./diff-engine.js"></script>

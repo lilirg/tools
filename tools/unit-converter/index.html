@@ -4,407 +4,166 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>📐 单位换算工具</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../theme.css">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-      min-height: 100vh;
-      padding: 20px;
-    }
-
-    .container { max-width: 800px; margin: 0 auto; }
-
-    .demo-title { text-align: center; margin-bottom: 30px; }
-    .demo-title h1 { font-size: 28px; color: #1a1a1a; margin-bottom: 8px; }
-    .demo-title p { color: #888; font-size: 14px; }
-
-    /* ===== 类别 Tab ===== */
-    .category-tabs {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
+    /* ===== Tool-specific styles ===== */
+    .uc-category-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 8px;
       margin-bottom: 20px;
-      background: #fff;
-      border-radius: 12px;
-      padding: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     }
 
-    .cat-tab {
-      padding: 8px 14px;
-      border: 1px solid #e8e8e8;
-      background: #fafafa;
-      border-radius: 8px;
+    .uc-category-btn {
+      padding: 10px 8px;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      background: transparent;
+      color: var(--text-tertiary);
       font-size: 13px;
       font-weight: 500;
-      color: #666;
       cursor: pointer;
-      transition: all 0.2s;
-      font-family: inherit;
-      white-space: nowrap;
+      transition: var(--transition);
+      text-align: center;
+      font-family: var(--font-body);
     }
 
-    .cat-tab:hover {
-      border-color: #1677ff;
-      color: #1677ff;
-      background: rgba(22, 119, 255, 0.04);
+    .uc-category-btn:hover {
+      border-color: var(--accent-1);
+      color: var(--accent-2);
+      background: var(--bg-highlight);
     }
 
-    .cat-tab.active {
-      border-color: #1677ff;
-      background: rgba(22, 119, 255, 0.1);
-      color: #1677ff;
-      font-weight: 600;
-      box-shadow: 0 2px 6px rgba(22, 119, 255, 0.15);
+    .uc-category-btn.active {
+      background: var(--accent-1);
+      color: #fff;
+      border-color: var(--accent-1);
     }
 
-    /* ===== 卡片 ===== */
-    .card {
-      background: #fff;
-      border-radius: 12px;
-      padding: 24px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-      margin-bottom: 20px;
-    }
+    .uc-category-icon { font-size: 20px; display: block; margin-bottom: 4px; }
 
-    .card h2 {
-      font-size: 16px;
-      color: #333;
-      margin-bottom: 16px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid #f0f0f0;
-    }
-
-    .card h3 {
-      font-size: 14px;
-      color: #555;
-      margin-bottom: 12px;
-    }
-
-    /* ===== 换算主区域 ===== */
-    .converter-grid {
+    .uc-converter {
       display: grid;
       grid-template-columns: 1fr auto 1fr;
       gap: 12px;
-      align-items: end;
-    }
-
-    .converter-grid .form-group {
-      margin-bottom: 0;
-    }
-
-    .swap-col {
-      display: flex;
       align-items: center;
-      justify-content: center;
-      padding-bottom: 2px;
     }
 
-    .swap-btn {
-      width: 44px;
-      height: 44px;
-      border: 2px solid #e8e8e8;
+    .uc-input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .uc-input-group input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 2px solid var(--border-input);
+      border-radius: var(--radius-sm);
+      font-size: 18px;
+      font-family: var(--font-mono);
+      background: var(--bg-input);
+      color: var(--text-primary);
+      transition: var(--transition);
+    }
+
+    .uc-input-group input:focus {
+      outline: none;
+      border-color: var(--accent-1);
+      box-shadow: 0 0 0 2px rgba(108,92,231,0.15);
+    }
+
+    .uc-input-group select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border-input);
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-family: var(--font-body);
+      background: var(--bg-input);
+      color: var(--text-primary);
+      cursor: pointer;
+    }
+
+    .uc-input-group select:focus { outline: none; border-color: var(--accent-1); }
+
+    .uc-swap-btn {
+      width: 44px; height: 44px;
+      border: 2px solid var(--border-subtle);
       border-radius: 50%;
-      background: #fff;
+      background: var(--bg-card);
+      color: var(--text-secondary);
       font-size: 20px;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: var(--transition);
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #999;
     }
 
-    .swap-btn:hover {
-      border-color: #1677ff;
-      color: #1677ff;
-      background: rgba(22, 119, 255, 0.04);
+    .uc-swap-btn:hover {
+      border-color: var(--accent-1);
+      color: var(--accent-2);
+      background: var(--bg-highlight);
       transform: rotate(180deg);
     }
 
-    .swap-btn:active {
-      transform: rotate(180deg) scale(0.95);
-    }
-
-    /* ===== 表单 ===== */
-    .form-group {
-      margin-bottom: 14px;
-    }
-
-    .form-group label {
-      display: block;
-      font-size: 13px;
-      font-weight: 600;
-      color: #555;
-      margin-bottom: 6px;
-    }
-
-    .form-group input[type="text"],
-    .form-group input[type="number"],
-    .form-group select {
-      width: 100%;
-      padding: 10px 12px;
-      border: 1px solid #d9d9d9;
-      border-radius: 8px;
-      font-size: 14px;
-      transition: border-color 0.2s;
-      font-family: inherit;
-      background: #fff;
-    }
-
-    .form-group input:focus,
-    .form-group select:focus {
-      outline: none;
-      border-color: #1677ff;
-      box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.1);
-    }
-
-    .form-group input[type="number"] {
-      font-size: 18px;
-      font-weight: 600;
-      color: #333;
-    }
-
-    .form-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-
-    .form-row-3 {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 12px;
-    }
-
-    /* ===== 结果展示 ===== */
-    .result-card {
-      display: none;
-      margin-top: 20px;
-      padding: 20px;
-      background: linear-gradient(135deg, #f6ffed 0%, #e6f7ff 100%);
-      border: 1px solid #b7eb8f;
-      border-radius: 12px;
-      text-align: center;
-    }
-
-    .result-card.show { display: block; }
-
-    .result-value {
-      font-size: 36px;
-      font-weight: 700;
-      color: #1677ff;
-      margin: 10px 0;
-      word-break: break-all;
-      line-height: 1.2;
-    }
-
-    .result-label {
-      font-size: 14px;
-      color: #888;
-      margin-bottom: 4px;
-    }
-
-    .result-formula {
-      font-size: 13px;
-      color: #999;
-      margin-top: 8px;
-      padding: 8px 12px;
-      background: #fff;
-      border-radius: 6px;
-      border: 1px solid #e8e8e8;
-      font-family: 'Courier New', monospace;
-      word-break: break-all;
-    }
-
-    /* ===== 操作栏 ===== */
-    .action-bar {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-top: 16px;
-      padding-top: 16px;
-      border-top: 1px solid #f0f0f0;
-      flex-wrap: wrap;
-    }
-
-    .action-bar .form-group {
-      margin-bottom: 0;
-      flex: 1;
-      min-width: 120px;
-    }
-
-    .action-bar .form-group label {
-      font-size: 12px;
-      margin-bottom: 4px;
-    }
-
-    .action-bar .form-group select {
-      padding: 6px 10px;
-      font-size: 12px;
-    }
-
-    .action-group {
-      display: flex;
-      gap: 8px;
-      align-items: flex-end;
-      padding-bottom: 2px;
-    }
-
-    /* ===== 智能识别开关 ===== */
-    .toggle-wrapper {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding-bottom: 2px;
-    }
-
-    .toggle-wrapper label {
-      font-size: 12px;
-      color: #666;
-      cursor: pointer;
-      user-select: none;
-    }
-
-    .toggle-switch {
-      position: relative;
-      width: 40px;
-      height: 22px;
-      flex-shrink: 0;
-    }
-
-    .toggle-switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-
-    .toggle-slider {
-      position: absolute;
-      cursor: pointer;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: #d9d9d9;
-      border-radius: 22px;
-      transition: 0.3s;
-    }
-
-    .toggle-slider::before {
-      content: '';
-      position: absolute;
-      height: 18px;
-      width: 18px;
-      left: 2px;
-      bottom: 2px;
-      background: #fff;
-      border-radius: 50%;
-      transition: 0.3s;
-    }
-
-    .toggle-switch input:checked + .toggle-slider {
-      background: #1677ff;
-    }
-
-    .toggle-switch input:checked + .toggle-slider::before {
-      transform: translateX(18px);
-    }
-
-    /* ===== 按钮 ===== */
-    .btn {
-      padding: 10px 24px;
-      border: none;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-family: inherit;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      white-space: nowrap;
-    }
-
-    .btn:hover { transform: translateY(-1px); }
-    .btn:active { transform: scale(0.98); }
-    .btn-primary { background: #1677ff; color: #fff; }
-    .btn-primary:hover { background: #4096ff; }
-    .btn-success { background: #52c41a; color: #fff; }
-    .btn-success:hover { background: #73d13d; }
-    .btn-default { background: #f0f0f0; color: #666; }
-    .btn-default:hover { background: #e0e0e0; }
-    .btn-danger { background: #ff4d4f; color: #fff; }
-    .btn-danger:hover { background: #ff7875; }
-    .btn-small { padding: 6px 12px; font-size: 12px; }
-
-    /* ===== 历史记录 ===== */
-    .history-section {
-      margin-top: 20px;
-      padding-top: 16px;
-      border-top: 1px solid #f0f0f0;
-    }
-
-    .history-header {
+    .uc-result-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 10px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .uc-result-row:last-child { border-bottom: none; }
+
+    .uc-result-label {
+      font-size: 13px;
+      color: var(--text-tertiary);
     }
 
-    .history-header h3 {
+    .uc-result-value {
       font-size: 14px;
-      color: #555;
-      margin-bottom: 0;
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-weight: 600;
     }
 
-    .history-list {
-      max-height: 200px;
-      overflow-y: auto;
-    }
-
-    .history-item {
+    .uc-history-item {
       display: flex;
       align-items: center;
       padding: 8px 10px;
-      border-bottom: 1px solid #f5f5f5;
+      border-bottom: 1px solid var(--border-subtle);
       position: relative;
-      cursor: default;
     }
+    .uc-history-item:last-child { border-bottom: none; }
 
-    .history-item:last-child { border-bottom: none; }
-
-    .history-title {
+    .uc-history-title {
       font-size: 13px;
-      color: #333;
+      color: var(--text-primary);
       flex: 1;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
     }
 
-    .history-detail {
+    .uc-history-detail {
       font-size: 12px;
-      color: #999;
+      color: var(--text-tertiary);
       margin-left: 8px;
-      white-space: nowrap;
       max-width: 200px;
       overflow: hidden;
       text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
-    .remove-history {
+    .uc-history-remove {
       position: absolute;
-      right: 4px;
-      top: 50%;
+      right: 4px; top: 50%;
       transform: translateY(-50%);
-      width: 18px;
-      height: 18px;
+      width: 18px; height: 18px;
       border-radius: 50%;
-      background: #ff4d4f;
+      background: var(--accent-9);
       color: #fff;
       border: none;
       font-size: 11px;
@@ -414,151 +173,89 @@
       text-align: center;
     }
 
-    .history-item:hover .remove-history { display: block; }
+    .uc-history-item:hover .uc-history-remove { display: block; }
 
-    .history-empty {
+    .uc-empty {
       font-size: 13px;
-      color: #ccc;
+      color: var(--text-muted);
       text-align: center;
       padding: 10px;
       display: block;
     }
 
-    /* ===== Toast ===== */
-    .uc-toast {
-      position: fixed;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%) translateY(-20px);
-      padding: 10px 24px;
-      border-radius: 8px;
-      font-size: 14px;
-      color: #fff;
-      z-index: 100000;
-      opacity: 0;
-      transition: all 0.3s ease;
-      pointer-events: none;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
     }
 
-    .uc-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-    .uc-toast.hide { opacity: 0; transform: translateX(-50%) translateY(-20px); }
-    .uc-toast-success { background: #52c41a; }
-    .uc-toast-error { background: #ff4d4f; }
-    .uc-toast-warning { background: #faad14; color: #333; }
-    .uc-toast-info { background: #1677ff; }
-
-    /* ===== 响应式 ===== */
     @media (max-width: 768px) {
-      .demo-title h1 { font-size: 24px; }
-      .card { padding: 16px; }
-      .converter-grid { grid-template-columns: 1fr; gap: 8px; }
-      .swap-col { padding: 4px 0; }
-      .swap-btn { width: 40px; height: 40px; font-size: 18px; }
-      .swap-btn:hover { transform: none; }
-      .swap-btn:active { transform: rotate(180deg) scale(0.95); }
-      .form-row { grid-template-columns: 1fr; }
-      .form-row-3 { grid-template-columns: 1fr; }
-      .result-value { font-size: 28px; }
-      .action-bar { flex-direction: column; align-items: stretch; }
-      .action-bar .form-group { min-width: auto; }
-      .action-group { justify-content: center; }
-      .toggle-wrapper { justify-content: center; }
-      .cat-tab { font-size: 12px; padding: 6px 10px; }
-      .history-detail { max-width: 120px; }
+      .uc-converter { grid-template-columns: 1fr; }
+      .uc-swap-btn {
+        width: 36px; height: 36px;
+        font-size: 16px;
+        margin: 0 auto;
+        transform: rotate(90deg);
+      }
+      .uc-swap-btn:hover { transform: rotate(270deg); }
+      .uc-category-grid { grid-template-columns: repeat(3, 1fr); }
+      .uc-input-group input { font-size: 16px; }
     }
 
     @media (max-width: 400px) {
-      body { padding: 12px; }
-      .card { padding: 12px; }
-      .result-value { font-size: 24px; }
-      .cat-tab { font-size: 11px; padding: 5px 8px; }
+      .uc-category-grid { grid-template-columns: repeat(2, 1fr); }
     }
   </style>
 </head>
 <body>
   <div class="container">
+    <div class="back-bar">
+      <a class="back-btn" href="../index.html">← 返回首页</a>
+    </div>
     <div class="demo-title">
       <h1>📐 单位换算工具</h1>
-      <p>纯前端实现 · 12 类别 · 100+ 单位</p>
+      <p>纯前端实现 · 12 类别 · 100+ 单位 · 实时换算</p>
     </div>
 
-    <!-- ===== 类别 Tab ===== -->
-    <div class="category-tabs" id="categoryTabs">
-      <!-- 由 JS 动态生成 -->
+    <div class="card">
+      <h2>📂 选择类别</h2>
+      <div class="uc-category-grid" id="categoryGrid"></div>
     </div>
 
-    <!-- ===== 换算主区域 ===== -->
     <div class="card">
       <h2>🔄 单位换算</h2>
-
-      <div class="converter-grid">
-        <!-- 源单位 -->
-        <div class="form-group">
-          <label for="fromUnit">源单位</label>
+      <div class="uc-converter">
+        <div class="uc-input-group">
+          <input type="text" id="fromValue" placeholder="输入数值" spellcheck="false">
           <select id="fromUnit"></select>
         </div>
-
-        <!-- 交换按钮 -->
-        <div class="swap-col">
-          <button class="swap-btn" id="swapBtn" title="交换源/目标单位">↕</button>
-        </div>
-
-        <!-- 目标单位 -->
-        <div class="form-group">
-          <label for="toUnit">目标单位</label>
+        <button class="uc-swap-btn" id="swapBtn">⇄</button>
+        <div class="uc-input-group">
+          <input type="text" id="toValue" placeholder="换算结果" readonly spellcheck="false">
           <select id="toUnit"></select>
         </div>
       </div>
+    </div>
 
-      <!-- 数值输入 -->
-      <div class="form-group" style="margin-top: 4px;">
-        <label for="inputValue">数值</label>
-        <input type="number" id="inputValue" placeholder="请输入数值..." step="any">
-      </div>
-
-      <!-- 换算结果 -->
-      <div class="result-card" id="resultCard">
-        <div class="result-label">换算结果</div>
-        <div class="result-value" id="resultValue">—</div>
-        <div class="result-formula" id="resultFormula">请输入数值开始换算</div>
-      </div>
-
-      <!-- 操作栏 -->
-      <div class="action-bar">
-        <div class="form-group">
-          <label for="precisionSelect">精度</label>
-          <select id="precisionSelect"></select>
-        </div>
-
-        <div class="toggle-wrapper">
-          <div class="toggle-switch">
-            <input type="checkbox" id="smartDetectToggle">
-            <span class="toggle-slider"></span>
-          </div>
-          <label for="smartDetectToggle">智能识别</label>
-        </div>
-
-        <div class="action-group">
-          <button class="btn btn-primary btn-small" id="copyBtn">📋 复制</button>
-          <button class="btn btn-default btn-small" id="clearBtn">🔄 清空</button>
-        </div>
+    <div class="card">
+      <h2>📊 详细换算结果</h2>
+      <div id="detailResults">
+        <span class="uc-empty">输入数值查看详细换算结果</span>
       </div>
     </div>
 
-    <!-- ===== 历史记录 ===== -->
     <div class="card">
       <div class="history-header">
-        <h3>📋 历史记录</h3>
+        <h2>📋 换算历史</h2>
         <button class="btn btn-small btn-danger" id="clearHistoryBtn">🗑️ 清空</button>
       </div>
-      <div class="history-list" id="historyList">
-        <span class="history-empty">暂无记录</span>
+      <div id="historyList">
+        <span class="uc-empty">暂无记录</span>
       </div>
     </div>
   </div>
 
-  <!-- ===== 引入模块（顺序重要） ===== -->
   <script src="./config.js"></script>
   <script src="./conversion-data.js"></script>
   <script src="./converter-engine.js"></script>
