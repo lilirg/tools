@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>⏱️ 正则表达式测试工具</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container { max-width: 900px; margin: 0 auto; }
+
+    .demo-title { text-align: center; margin-bottom: 30px; }
+    .demo-title h1 { font-size: 28px; color: #1a1a1a; margin-bottom: 8px; }
+    .demo-title p { color: #888; font-size: 14px; }
+
+    /* ===== 卡片 ===== */
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      margin-bottom: 20px;
+    }
+
+    .card h2 {
+      font-size: 16px;
+      color: #333;
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .card h3 {
+      font-size: 14px;
+      color: #555;
+      margin-bottom: 12px;
+    }
+
+    /* ===== 模板选择 ===== */
+    .template-row {
+      margin-bottom: 16px;
+    }
+
+    .template-row select {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #d9d9d9;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      background: #fff;
+      cursor: pointer;
+    }
+
+    .template-row select:focus {
+      outline: none;
+      border-color: #1677ff;
+    }
+
+    /* ===== 正则输入 ===== */
+    .pattern-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .pattern-row input {
+      flex: 1;
+      padding: 10px 14px;
+      border: 2px solid #d9d9d9;
+      border-radius: 8px;
+      font-size: 15px;
+      font-family: 'Courier New', monospace;
+      background: #f8f9fa;
+    }
+
+    .pattern-row input:focus {
+      outline: none;
+      border-color: #1677ff;
+      box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.1);
+    }
+
+    .rt-pattern-display {
+      padding: 8px 12px;
+      background: #f0f0f0;
+      border-radius: 6px;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      color: #1677ff;
+      margin-bottom: 12px;
+      word-break: break-all;
+    }
+
+    .rt-pattern-hint {
+      color: #ccc !important;
+      font-family: inherit !important;
+    }
+
+    /* ===== 修饰符 ===== */
+    .flag-toggles {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .rt-flag-label {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      border: 1px solid #d9d9d9;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+      user-select: none;
+    }
+
+    .rt-flag-label:hover {
+      border-color: #1677ff;
+      color: #1677ff;
+    }
+
+    .rt-flag-label input:checked + span {
+      color: #1677ff;
+      font-weight: 600;
+    }
+
+    .rt-flag-label:has(input:checked) {
+      border-color: #1677ff;
+      background: rgba(22, 119, 255, 0.06);
+    }
+
+    .rt-flag-label input { display: none; }
+
+    /* ===== 测试文本 ===== */
+    .test-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .test-layout textarea {
+      width: 100%;
+      height: 200px;
+      padding: 12px;
+      border: 1px solid #d9d9d9;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: 'Courier New', monospace;
+      resize: vertical;
+      line-height: 1.6;
+    }
+
+    .test-layout textarea:focus {
+      outline: none;
+      border-color: #1677ff;
+    }
+
+    .rt-highlight-box {
+      width: 100%;
+      height: 200px;
+      padding: 12px;
+      border: 1px solid #d9d9d9;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: 'Courier New', monospace;
+      line-height: 1.6;
+      overflow: auto;
+      background: #fafafa;
+      white-space: pre-wrap;
+      word-break: break-all;
+      position: relative;
+    }
+
+    /* ===== 匹配高亮 ===== */
+    .rt-match {
+      background: #ffd43b;
+      border-radius: 2px;
+      padding: 0 1px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .rt-match:hover {
+      background: #fab005;
+    }
+
+    .rt-error-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 8px 12px;
+      background: rgba(255, 77, 79, 0.9);
+      color: #fff;
+      font-size: 12px;
+      font-family: inherit;
+    }
+
+    /* ===== 匹配结果 ===== */
+    .match-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+
+    .rt-match-count {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .rt-match-ok { color: #52c41a; }
+    .rt-match-error { color: #ff4d4f; font-size: 12px; }
+
+    .rt-match-list {
+      margin-top: 12px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .rt-match-item {
+      padding: 8px 10px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .rt-match-item:last-child { border-bottom: none; }
+
+    .rt-match-header {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 4px;
+    }
+
+    .rt-match-num {
+      font-weight: 600;
+      color: #1677ff;
+      font-size: 12px;
+    }
+
+    .rt-match-pos {
+      color: #999;
+      font-size: 12px;
+    }
+
+    .rt-match-value {
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      color: #333;
+      padding: 4px 8px;
+      background: #f8f9fa;
+      border-radius: 4px;
+      word-break: break-all;
+    }
+
+    .rt-match-groups {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 4px;
+    }
+
+    .rt-group-item {
+      font-size: 12px;
+      padding: 2px 6px;
+      background: #e6f7ff;
+      border-radius: 4px;
+    }
+
+    .rt-group-label {
+      color: #1677ff;
+      font-weight: 600;
+    }
+
+    .rt-group-value {
+      color: #333;
+      font-family: 'Courier New', monospace;
+    }
+
+    /* ===== 替换区域 ===== */
+    .replace-area {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid #f0f0f0;
+    }
+
+    .replace-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .replace-row input {
+      flex: 1;
+      padding: 8px 12px;
+      border: 1px solid #d9d9d9;
+      border-radius: 6px;
+      font-size: 14px;
+      font-family: 'Courier New', monospace;
+      min-width: 150px;
+    }
+
+    .replace-row input:focus {
+      outline: none;
+      border-color: #1677ff;
+    }
+
+    .replace-result-box {
+      margin-top: 8px;
+      padding: 10px 12px;
+      background: #f8f9fa;
+      border-radius: 6px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      line-height: 1.5;
+      min-height: 40px;
+      word-break: break-all;
+    }
+
+    .replace-count {
+      font-size: 12px;
+      color: #999;
+      margin-top: 4px;
+    }
+
+    /* ===== 语法参考 ===== */
+    .rt-syntax-toggle {
+      padding: 10px 14px;
+      background: #f8f9fa;
+      border: 1px solid #e8e8e8;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      color: #555;
+      transition: all 0.2s;
+      font-family: inherit;
+      width: 100%;
+      text-align: left;
+    }
+
+    .rt-syntax-toggle:hover {
+      background: #f0f0f0;
+      color: #333;
+    }
+
+    .rt-syntax-content {
+      display: none;
+      margin-top: 12px;
+    }
+
+    .rt-syntax-section {
+      margin-bottom: 16px;
+    }
+
+    .rt-syntax-section h4 {
+      font-size: 14px;
+      color: #333;
+      margin-bottom: 8px;
+      padding-bottom: 4px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .rt-syntax-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .rt-syntax-table td {
+      padding: 4px 8px;
+      font-size: 13px;
+      border-bottom: 1px solid #f5f5f5;
+    }
+
+    .rt-syntax-code {
+      width: 120px;
+      font-family: 'Courier New', monospace;
+      color: #1677ff;
+      font-weight: 600;
+    }
+
+    .rt-syntax-code code {
+      background: #f0f0f0;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 13px;
+    }
+
+    .rt-syntax-desc {
+      color: #666;
+    }
+
+    /* ===== 按钮 ===== */
+    .btn {
+      padding: 8px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn:hover { transform: translateY(-1px); }
+    .btn:active { transform: scale(0.98); }
+    .btn-primary { background: #1677ff; color: #fff; }
+    .btn-primary:hover { background: #4096ff; }
+    .btn-success { background: #52c41a; color: #fff; }
+    .btn-success:hover { background: #73d13d; }
+    .btn-default { background: #f0f0f0; color: #666; }
+    .btn-default:hover { background: #e0e0e0; }
+    .btn-danger { background: #ff4d4f; color: #fff; }
+    .btn-danger:hover { background: #ff7875; }
+    .btn-small { padding: 6px 12px; font-size: 12px; }
+
+    /* ===== 历史记录 ===== */
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .rt-history-item {
+      display: flex;
+      align-items: center;
+      padding: 8px 10px;
+      border-bottom: 1px solid #f5f5f5;
+      position: relative;
+    }
+
+    .rt-history-item:last-child { border-bottom: none; }
+
+    .rt-history-title {
+      font-size: 13px;
+      color: #333;
+      flex: 1;
+    }
+
+    .rt-history-detail {
+      font-size: 12px;
+      color: #999;
+      margin-left: 8px;
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .rt-history-remove {
+      position: absolute;
+      right: 4px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #ff4d4f;
+      color: #fff;
+      border: none;
+      font-size: 11px;
+      cursor: pointer;
+      display: none;
+      line-height: 18px;
+      text-align: center;
+    }
+
+    .rt-history-item:hover .rt-history-remove { display: block; }
+
+    .rt-empty {
+      font-size: 13px;
+      color: #ccc;
+      text-align: center;
+      padding: 10px;
+      display: block;
+    }
+
+    /* ===== Toast ===== */
+    .rt-toast {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-20px);
+      padding: 10px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #fff;
+      z-index: 100000;
+      opacity: 0;
+      transition: all 0.3s ease;
+      pointer-events: none;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .rt-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .rt-toast.hide { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+    .rt-toast-success { background: #52c41a; }
+    .rt-toast-error { background: #ff4d4f; }
+    .rt-toast-warning { background: #faad14; color: #333; }
+    .rt-toast-info { background: #1677ff; }
+
+    /* ===== 响应式 ===== */
+    @media (max-width: 768px) {
+      .demo-title h1 { font-size: 24px; }
+      .card { padding: 16px; }
+      .test-layout { grid-template-columns: 1fr; }
+      .test-layout textarea { height: 150px; }
+      .rt-highlight-box { height: 150px; }
+      .pattern-row { flex-direction: column; }
+      .pattern-row input { width: 100%; }
+      .replace-row { flex-direction: column; }
+      .replace-row input { width: 100%; }
+      .flag-toggles { gap: 4px; }
+      .rt-flag-label { font-size: 12px; padding: 3px 8px; }
+    }
+
+    @media (max-width: 400px) {
+      body { padding: 12px; }
+      .card { padding: 12px; }
+      .demo-title h1 { font-size: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="demo-title">
+      <h1>⏱️ 正则表达式测试工具</h1>
+      <p>纯前端实现 · 实时匹配 · 捕获组展示 · 替换测试</p>
+    </div>
+
+    <!-- ===== 模板选择 ===== -->
+    <div class="card">
+      <h2>📝 常用正则模板</h2>
+      <div class="template-row">
+        <select id="templateSelect"></select>
+      </div>
+    </div>
+
+    <!-- ===== 正则输入 ===== -->
+    <div class="card">
+      <h2>🔤 正则表达式</h2>
+      <div class="pattern-row">
+        <input type="text" id="patternInput" placeholder="输入正则表达式，如 [\w.-]+@[\w.-]+\.\w+" spellcheck="false">
+      </div>
+      <div class="rt-pattern-display" id="patternDisplay">输入正则表达式开始测试...</div>
+
+      <h3>🏷️ 修饰符</h3>
+      <div class="flag-toggles" id="flagToggles"></div>
+    </div>
+
+    <!-- ===== 测试文本 ===== -->
+    <div class="card">
+      <h2>📄 测试文本</h2>
+      <div class="test-layout">
+        <div>
+          <h3>输入文本</h3>
+          <textarea id="testText" placeholder="在此输入测试文本..." spellcheck="false">联系人: 张三
+邮箱: zhangsan@example.com
+电话: 13800138000
+网址: https://www.example.com/path?query=value
+备用邮箱: lisi@test.org
+日期: 2024-01-15
+时间: 14:30</textarea>
+        </div>
+        <div>
+          <h3>匹配高亮</h3>
+          <div class="rt-highlight-box" id="testHighlight">输入正则表达式和测试文本查看匹配结果</div>
+        </div>
+      </div>
+
+      <!-- 匹配结果 -->
+      <div class="match-info">
+        <div class="rt-match-count" id="matchCount">等待输入...</div>
+      </div>
+      <div class="rt-match-list" id="matchList">
+        <span class="rt-empty">无匹配结果</span>
+      </div>
+    </div>
+
+    <!-- ===== 替换 ===== -->
+    <div class="card">
+      <h2>🔄 替换测试</h2>
+      <div class="replace-area">
+        <div class="replace-row">
+          <label style="font-size:13px;color:#666;white-space:nowrap;">替换为:</label>
+          <input type="text" id="replacementInput" placeholder="输入替换文本，如 ***" spellcheck="false">
+          <button class="btn btn-primary" id="replaceBtn">🔄 替换</button>
+        </div>
+        <div class="replace-result-box" id="replaceResult">点击"替换"查看结果</div>
+        <div class="replace-count" id="replaceCount"></div>
+      </div>
+    </div>
+
+    <!-- ===== 语法参考 ===== -->
+    <div class="card">
+      <button class="rt-syntax-toggle" id="syntaxToggle">📖 语法参考 (点击展开)</button>
+      <div class="rt-syntax-content" id="syntaxContent"></div>
+    </div>
+
+    <!-- ===== 历史记录 ===== -->
+    <div class="card">
+      <div class="history-header">
+        <h2>📋 历史记录</h2>
+        <button class="btn btn-small btn-danger" id="clearHistoryBtn">🗑️ 清空</button>
+      </div>
+      <div id="historyList">
+        <span class="rt-empty">暂无记录</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 引入模块（顺序重要） ===== -->
+  <script src="./config.js"></script>
+  <script src="./regex-engine.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>

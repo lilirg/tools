@@ -13,6 +13,9 @@
 | 📅 [日期时间计算器](tools/date-calculator/) | 日期差计算、时间戳互转、时区转换、节假日查询、年龄计算 | ✅ 已完成 |
 | 🔐 [文本加密/编码工具箱](tools/text-encoder/) | Base64/URL/HTML 编解码、MD5/SHA 哈希、文本统计 | ✅ 已完成 |
 | 📐 [单位换算工具](tools/unit-converter/) | 12 类别 100+ 单位实时换算，支持智能识别 | ✅ 已完成 |
+| 🎨 [颜色选择器 & 调色板](tools/color-picker/) | 颜色拾取器（HSL/RGB/HEX/HSV）、配色方案生成、图片取色、对比度检测 | ✅ 已完成 |
+| 🔄 [JSON 格式化 & 对比](tools/json-formatter/) | JSON 格式化/压缩/校验、语法高亮、差异对比、路径查询、JSON/CSV 互转 | ✅ 已完成 |
+| ⏱️ [正则表达式测试工具](tools/regex-tester/) | 正则实时匹配与高亮、捕获组展示、替换测试、常用模板库、语法速查表 | ✅ 已完成 |
 
 ## 快速开始
 
@@ -62,12 +65,32 @@
     │   ├── stats-engine.js             # 文本统计引擎
     │   ├── app.js                      # 主应用逻辑
     │   └── index.html                  # 工具页面
-    └── unit-converter/                 # 单位换算工具
+    ├── unit-converter/                 # 单位换算工具
+    │   ├── config.js                   # 配置模块
+    │   ├── conversion-data.js          # 换算数据
+    │   ├── converter-engine.js         # 换算引擎
+    │   ├── app.js                      # 主应用逻辑
+    │   └── index.html                  # 工具页面
+    ├── color-picker/                   # 颜色选择器 & 调色板
+    │   ├── config.js                   # 配置模块
+    │   ├── color-utils.js              # 颜色转换/计算引擎
+    │   ├── palette-engine.js           # 调色板生成引擎
+    │   ├── app.js                      # UI 交互层
+    │   ├── index.html                  # 工具页面
+    │   └── USAGE.md                    # 使用文档
+    ├── json-formatter/                 # JSON 格式化 & 对比
+    │   ├── config.js                   # 配置模块
+    │   ├── json-engine.js              # JSON 解析/格式化引擎
+    │   ├── diff-engine.js              # 差异对比引擎
+    │   ├── app.js                      # UI 交互层
+    │   ├── index.html                  # 工具页面
+    │   └── USAGE.md                    # 使用文档
+    └── regex-tester/                   # 正则表达式测试工具
         ├── config.js                   # 配置模块
-        ├── conversion-data.js          # 换算数据
-        ├── converter-engine.js         # 换算引擎
-        ├── app.js                      # 主应用逻辑
-        └── index.html                  # 工具页面
+        ├── regex-engine.js             # 正则匹配/替换引擎
+        ├── app.js                      # UI 交互层
+        ├── index.html                  # 工具页面
+        └── USAGE.md                    # 使用文档
 ```
 
 ## 开发指南

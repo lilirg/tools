@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>🎨 颜色选择器 & 调色板</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container { max-width: 900px; margin: 0 auto; }
+
+    .demo-title { text-align: center; margin-bottom: 30px; }
+    .demo-title h1 { font-size: 28px; color: #1a1a1a; margin-bottom: 8px; }
+    .demo-title p { color: #888; font-size: 14px; }
+
+    /* ===== Tab 导航 ===== */
+    .cp-tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 20px;
+      background: #fff;
+      border-radius: 12px;
+      padding: 6px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .cp-tab-btn {
+      flex: 1;
+      padding: 10px 16px;
+      border: none;
+      background: transparent;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #666;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+
+    .cp-tab-btn:hover { color: #1677ff; background: rgba(22, 119, 255, 0.04); }
+    .cp-tab-btn.active {
+      color: #1677ff;
+      background: rgba(22, 119, 255, 0.1);
+      font-weight: 600;
+      box-shadow: 0 2px 6px rgba(22, 119, 255, 0.15);
+    }
+
+    .cp-tab-content { display: none; }
+    .cp-tab-content.active { display: block; }
+
+    /* ===== 卡片 ===== */
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      margin-bottom: 20px;
+    }
+
+    .card h2 {
+      font-size: 16px;
+      color: #333;
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .card h3 {
+      font-size: 14px;
+      color: #555;
+      margin-bottom: 12px;
+    }
+
+    /* ===== 颜色选择器布局 ===== */
+    .picker-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .picker-canvas-area {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .hue-bar {
+      width: 100%;
+      height: 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .hue-bar canvas {
+      width: 100%;
+      height: 100%;
+      border-radius: 4px;
+      display: block;
+    }
+
+    .panel-container {
+      position: relative;
+      width: 100%;
+      cursor: crosshair;
+    }
+
+    .panel-container canvas {
+      width: 100%;
+      border-radius: 4px;
+      display: block;
+    }
+
+    /* ===== 颜色预览 ===== */
+    .color-preview-area {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .color-preview-box {
+      width: 100%;
+      height: 120px;
+      border-radius: 12px;
+      border: 2px solid #e8e8e8;
+      transition: background-color 0.15s ease;
+    }
+
+    .color-values {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+
+    .color-value-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      background: #f8f9fa;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .color-value-item:hover { background: #e8e8e8; }
+
+    .color-value-label {
+      color: #999;
+      font-weight: 600;
+      min-width: 32px;
+    }
+
+    .color-value-text {
+      color: #333;
+      font-family: 'Courier New', monospace;
+      font-size: 11px;
+      word-break: break-all;
+    }
+
+    /* ===== 颜色输入 ===== */
+    .color-input-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .color-input-row select,
+    .color-input-row input {
+      padding: 8px 10px;
+      border: 1px solid #d9d9d9;
+      border-radius: 8px;
+      font-size: 13px;
+      font-family: inherit;
+      background: #fff;
+    }
+
+    .color-input-row select:focus,
+    .color-input-row input:focus {
+      outline: none;
+      border-color: #1677ff;
+      box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.1);
+    }
+
+    .color-input-row input { flex: 1; font-family: 'Courier New', monospace; }
+    .color-input-row select { width: 80px; }
+
+    /* ===== 预设颜色 ===== */
+    .preset-colors {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .cp-swatch {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .cp-swatch:hover {
+      transform: scale(1.2);
+      border-color: #1677ff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    /* ===== 调色板网格 ===== */
+    .palette-grid {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .cp-palette-item {
+      flex: 1;
+      min-width: 80px;
+      text-align: center;
+    }
+
+    .cp-palette-swatch {
+      width: 100%;
+      height: 60px;
+      border-radius: 8px;
+      cursor: pointer;
+      border: 2px solid #e8e8e8;
+      transition: all 0.2s;
+    }
+
+    .cp-palette-swatch:hover {
+      transform: scale(1.05);
+      border-color: #1677ff;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .cp-palette-label {
+      font-size: 12px;
+      color: #888;
+      margin-top: 4px;
+    }
+
+    .cp-palette-value {
+      font-size: 11px;
+      color: #aaa;
+      font-family: 'Courier New', monospace;
+    }
+
+    /* ===== 调色板控制 ===== */
+    .palette-controls {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .palette-controls select,
+    .palette-controls input {
+      padding: 6px 10px;
+      border: 1px solid #d9d9d9;
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: inherit;
+      background: #fff;
+    }
+
+    .palette-controls select:focus,
+    .palette-controls input:focus {
+      outline: none;
+      border-color: #1677ff;
+    }
+
+    /* ===== 对比度检测 ===== */
+    .contrast-row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .contrast-row input[type="color"] {
+      width: 48px;
+      height: 48px;
+      border: 2px solid #e8e8e8;
+      border-radius: 8px;
+      cursor: pointer;
+      padding: 2px;
+    }
+
+    .contrast-row input[type="text"] {
+      padding: 8px 10px;
+      border: 1px solid #d9d9d9;
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: 'Courier New', monospace;
+      width: 100px;
+    }
+
+    .contrast-ratio {
+      font-size: 24px;
+      font-weight: 700;
+      color: #1677ff;
+    }
+
+    .contrast-result { font-size: 13px; }
+    .contrast-result .pass { color: #52c41a; padding: 2px 0; }
+    .contrast-result .fail { color: #ff4d4f; padding: 2px 0; }
+
+    /* ===== 图片取色 ===== */
+    .image-upload-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      padding: 30px;
+      border: 2px dashed #d9d9d9;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .image-upload-area:hover {
+      border-color: #1677ff;
+      background: rgba(22, 119, 255, 0.02);
+    }
+
+    .image-upload-area .upload-icon {
+      font-size: 48px;
+      opacity: 0.5;
+    }
+
+    .image-upload-area .upload-text {
+      color: #999;
+      font-size: 14px;
+    }
+
+    .image-preview {
+      max-width: 100%;
+      margin-top: 12px;
+    }
+
+    .image-preview canvas {
+      max-width: 100%;
+      border-radius: 8px;
+      border: 1px solid #e8e8e8;
+    }
+
+    .extracted-colors {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .cp-extracted-color {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .cp-extracted-swatch {
+      width: 48px;
+      height: 48px;
+      border-radius: 8px;
+      cursor: pointer;
+      border: 2px solid #e8e8e8;
+      transition: all 0.2s;
+    }
+
+    .cp-extracted-swatch:hover {
+      transform: scale(1.1);
+      border-color: #1677ff;
+    }
+
+    .cp-extracted-info {
+      text-align: center;
+      font-size: 11px;
+    }
+
+    .cp-extracted-hex {
+      color: #333;
+      font-family: 'Courier New', monospace;
+      display: block;
+    }
+
+    .cp-extracted-ratio {
+      color: #999;
+    }
+
+    /* ===== 收藏 ===== */
+    .fav-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .cp-fav-item {
+      display: flex;
+      align-items: center;
+      padding: 6px 8px;
+      border-bottom: 1px solid #f5f5f5;
+      position: relative;
+    }
+
+    .cp-fav-item:last-child { border-bottom: none; }
+
+    .cp-fav-swatch {
+      width: 24px;
+      height: 24px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid #e8e8e8;
+      margin-right: 8px;
+      flex-shrink: 0;
+    }
+
+    .cp-fav-label {
+      font-size: 13px;
+      color: #333;
+      font-family: 'Courier New', monospace;
+      flex: 1;
+    }
+
+    .cp-fav-remove {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #ff4d4f;
+      color: #fff;
+      border: none;
+      font-size: 11px;
+      cursor: pointer;
+      display: none;
+      line-height: 18px;
+      text-align: center;
+    }
+
+    .cp-fav-item:hover .cp-fav-remove { display: block; }
+
+    /* ===== 历史记录 ===== */
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .cp-history-item {
+      display: flex;
+      align-items: center;
+      padding: 6px 8px;
+      border-bottom: 1px solid #f5f5f5;
+      position: relative;
+    }
+
+    .cp-history-item:last-child { border-bottom: none; }
+
+    .cp-history-swatch {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid #e8e8e8;
+      margin-right: 8px;
+      flex-shrink: 0;
+    }
+
+    .cp-history-label {
+      font-size: 12px;
+      color: #999;
+      font-family: 'Courier New', monospace;
+      flex: 1;
+    }
+
+    .cp-history-remove {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #ff4d4f;
+      color: #fff;
+      border: none;
+      font-size: 10px;
+      cursor: pointer;
+      display: none;
+      line-height: 16px;
+      text-align: center;
+    }
+
+    .cp-history-item:hover .cp-history-remove { display: block; }
+
+    .cp-empty {
+      font-size: 13px;
+      color: #ccc;
+      text-align: center;
+      padding: 10px;
+      display: block;
+    }
+
+    /* ===== 按钮 ===== */
+    .btn {
+      padding: 8px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn:hover { transform: translateY(-1px); }
+    .btn:active { transform: scale(0.98); }
+    .btn-primary { background: #1677ff; color: #fff; }
+    .btn-primary:hover { background: #4096ff; }
+    .btn-success { background: #52c41a; color: #fff; }
+    .btn-success:hover { background: #73d13d; }
+    .btn-default { background: #f0f0f0; color: #666; }
+    .btn-default:hover { background: #e0e0e0; }
+    .btn-danger { background: #ff4d4f; color: #fff; }
+    .btn-danger:hover { background: #ff7875; }
+    .btn-small { padding: 6px 12px; font-size: 12px; }
+
+    /* ===== Toast ===== */
+    .cp-toast {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-20px);
+      padding: 10px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #fff;
+      z-index: 100000;
+      opacity: 0;
+      transition: all 0.3s ease;
+      pointer-events: none;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .cp-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .cp-toast.hide { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+    .cp-toast-success { background: #52c41a; }
+    .cp-toast-error { background: #ff4d4f; }
+    .cp-toast-warning { background: #faad14; color: #333; }
+    .cp-toast-info { background: #1677ff; }
+
+    /* ===== 响应式 ===== */
+    @media (max-width: 768px) {
+      .demo-title h1 { font-size: 24px; }
+      .card { padding: 16px; }
+      .picker-layout { grid-template-columns: 1fr; }
+      .color-values { grid-template-columns: 1fr; }
+      .palette-controls { flex-direction: column; align-items: stretch; }
+      .contrast-row { flex-direction: column; align-items: stretch; }
+      .contrast-row input[type="text"] { width: 100%; }
+      .cp-tab-btn { font-size: 13px; padding: 8px 12px; }
+    }
+
+    @media (max-width: 400px) {
+      body { padding: 12px; }
+      .card { padding: 12px; }
+      .demo-title h1 { font-size: 20px; }
+      .color-preview-box { height: 80px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="demo-title">
+      <h1>🎨 颜色选择器 & 调色板</h1>
+      <p>纯前端实现 · 多格式支持 · 配色方案生成</p>
+    </div>
+
+    <!-- ===== Tab 导航 ===== -->
+    <div class="cp-tabs">
+      <button class="cp-tab-btn active">🎨 颜色选择</button>
+      <button class="cp-tab-btn">🌈 调色板</button>
+      <button class="cp-tab-btn">📷 图片取色</button>
+      <button class="cp-tab-btn">🔍 对比度</button>
+    </div>
+
+    <!-- ===== Tab 1: 颜色选择 ===== -->
+    <div class="cp-tab-content active">
+      <div class="card">
+        <h2>🎨 颜色选择器</h2>
+        <div class="picker-layout">
+          <!-- 左侧：Canvas 选择器 -->
+          <div class="picker-canvas-area">
+            <div>
+              <h3>色相</h3>
+              <div class="hue-bar">
+                <canvas id="hueCanvas" width="300" height="20"></canvas>
+              </div>
+            </div>
+            <div>
+              <h3>饱和度 / 亮度</h3>
+              <div class="panel-container">
+                <canvas id="panelCanvas" width="300" height="200"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- 右侧：颜色预览和值 -->
+          <div class="color-preview-area">
+            <div class="color-preview-box" id="colorPreview"></div>
+
+            <div class="color-values">
+              <div class="color-value-item" title="点击复制" onclick="this.closest('.cp-tab-content.active').__cpCopy('colorHex')">
+                <span class="color-value-label">HEX</span>
+                <span class="color-value-text" id="colorHex">#1677ff</span>
+              </div>
+              <div class="color-value-item" title="点击复制" onclick="this.closest('.cp-tab-content.active').__cpCopy('colorRgb')">
+                <span class="color-value-label">RGB</span>
+                <span class="color-value-text" id="colorRgb">rgb(22, 119, 255)</span>
+              </div>
+              <div class="color-value-item" title="点击复制" onclick="this.closest('.cp-tab-content.active').__cpCopy('colorHsl')">
+                <span class="color-value-label">HSL</span>
+                <span class="color-value-text" id="colorHsl">hsl(217, 100%, 54%)</span>
+              </div>
+              <div class="color-value-item" title="点击复制" onclick="this.closest('.cp-tab-content.active').__cpCopy('colorHsv')">
+                <span class="color-value-label">HSV</span>
+                <span class="color-value-text" id="colorHsv">hsv(217, 91%, 100%)</span>
+              </div>
+            </div>
+
+            <div class="color-input-row">
+              <select id="formatSelect"></select>
+              <input type="text" id="colorInput" placeholder="输入颜色值..." spellcheck="false">
+              <button class="btn btn-primary btn-small" id="applyColorBtn">应用</button>
+              <button class="btn btn-success btn-small" id="favoriteBtn">⭐ 收藏</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 预设颜色 -->
+      <div class="card">
+        <h2>🎯 预设颜色</h2>
+        <div class="preset-colors" id="presetColors"></div>
+      </div>
+
+      <!-- 收藏 -->
+      <div class="card">
+        <div class="fav-header">
+          <h2>⭐ 收藏的颜色</h2>
+          <button class="btn btn-small btn-danger" id="clearFavoritesBtn">🗑️ 清空</button>
+        </div>
+        <div id="favoritesList">
+          <span class="cp-empty">暂无收藏</span>
+        </div>
+      </div>
+
+      <!-- 历史记录 -->
+      <div class="card">
+        <div class="history-header">
+          <h2>📋 历史记录</h2>
+          <button class="btn btn-small btn-danger" id="clearHistoryBtn">🗑️ 清空</button>
+        </div>
+        <div id="historyList">
+          <span class="cp-empty">暂无记录</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Tab 2: 调色板 ===== -->
+    <div class="cp-tab-content">
+      <div class="card">
+        <h2>🌈 调色板生成</h2>
+        <div class="palette-controls">
+          <select id="paletteType"></select>
+          <label style="font-size:13px;color:#666;">
+            颜色数量:
+            <input type="number" id="paletteCount" value="5" min="2" max="10" style="width:60px;">
+          </label>
+        </div>
+        <div class="palette-grid" id="paletteGrid">
+          <span class="cp-empty">请选择配色方案类型</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Tab 3: 图片取色 ===== -->
+    <div class="cp-tab-content">
+      <div class="card">
+        <h2>📷 从图片提取颜色</h2>
+        <div class="image-upload-area" id="extractColorsBtn">
+          <div class="upload-icon">🖼️</div>
+          <div class="upload-text">点击上传图片，自动提取主色调</div>
+          <div class="upload-text" style="font-size:12px;color:#bbb;">支持 JPG / PNG / WebP</div>
+        </div>
+        <input type="file" id="imageUpload" accept="image/*" style="display:none">
+        <div class="image-preview">
+          <canvas id="imageCanvas" style="display:none"></canvas>
+        </div>
+        <div class="extracted-colors" id="imageColors"></div>
+      </div>
+    </div>
+
+    <!-- ===== Tab 4: 对比度 ===== -->
+    <div class="cp-tab-content">
+      <div class="card">
+        <h2>🔍 颜色对比度检测</h2>
+        <p style="font-size:13px;color:#888;margin-bottom:16px;">
+          检测两种颜色的对比度是否符合 WCAG 无障碍标准
+        </p>
+        <div class="contrast-row">
+          <div>
+            <div style="font-size:12px;color:#888;margin-bottom:4px;">前景色</div>
+            <input type="color" id="contrastColor1" value="#333333">
+            <input type="text" id="contrastColor1Text" value="#333333" readonly style="width:80px;padding:6px;border:1px solid #d9d9d9;border-radius:6px;font-size:12px;font-family:'Courier New',monospace;">
+          </div>
+          <div style="font-size:24px;color:#ccc;">vs</div>
+          <div>
+            <div style="font-size:12px;color:#888;margin-bottom:4px;">背景色</div>
+            <input type="color" id="contrastColor2" value="#FFFFFF">
+            <input type="text" id="contrastColor2Text" value="#FFFFFF" readonly style="width:80px;padding:6px;border:1px solid #d9d9d9;border-radius:6px;font-size:12px;font-family:'Courier New',monospace;">
+          </div>
+          <div>
+            <div style="font-size:12px;color:#888;margin-bottom:4px;">对比度</div>
+            <div class="contrast-ratio" id="contrastRatio">—</div>
+          </div>
+        </div>
+        <div class="contrast-result" id="contrastResult">
+          请输入有效的 HEX 颜色值
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 引入模块（顺序重要） ===== -->
+  <script src="./config.js"></script>
+  <script src="./color-utils.js"></script>
+  <script src="./palette-engine.js"></script>
+  <script src="./app.js"></script>
+  <script>
+    // 为颜色值复制提供全局方法
+    document.addEventListener('DOMContentLoaded', function () {
+      document.querySelectorAll('.color-value-item').forEach(function (item) {
+        item.addEventListener('click', function () {
+          var textEl = this.querySelector('.color-value-text')
+          if (textEl && window._colorPickerApp) {
+            window._colorPickerApp._copyText(textEl.textContent, '颜色值已复制')
+          }
+        })
+      })
+
+      // 对比度颜色同步
+      var c1 = document.getElementById('contrastColor1')
+      var c1t = document.getElementById('contrastColor1Text')
+      var c2 = document.getElementById('contrastColor2')
+      var c2t = document.getElementById('contrastColor2Text')
+
+      if (c1 && c1t) {
+        c1.addEventListener('input', function () {
+          c1t.value = this.value
+          if (window._colorPickerApp) window._colorPickerApp._updateContrast()
+        })
+      }
+      if (c2 && c2t) {
+        c2.addEventListener('input', function () {
+          c2t.value = this.value
+          if (window._colorPickerApp) window._colorPickerApp._updateContrast()
+        })
+      }
+    })
+  </script>
+</body>
+</html>
